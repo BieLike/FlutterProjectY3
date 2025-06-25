@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,10 +11,12 @@ class ManageCategoriesPage extends StatefulWidget {
   State<ManageCategoriesPage> createState() => _CategoryPageState();
 }
 
+basePath bp = basePath();
+final String bpt = bp.bpath();
 class _CategoryPageState extends State<ManageCategoriesPage> {
   List data = [];
   final String baseurl =
-      "http://localhost:3000"; //localhost  /pe 192.168.189.1
+      bpt; //localhost  /pe 192.168.189.1
   TextEditingController txtSearch = TextEditingController();
   TextEditingController txtNewID = TextEditingController();
   TextEditingController txtNewName = TextEditingController();

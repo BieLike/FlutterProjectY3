@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/models/book.dart';
 import 'package:flutter_lect2/newuxui/models/book_category.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
@@ -10,6 +11,8 @@ class nHomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+basePath bp = basePath();
+final String bpt = bp.bpath();
 class _HomePageState extends State<nHomePage> {
   // ຂໍ້ມູນໝວດໝູ່ປຶ້ມຕົວຢ່າງ
   List<BookCategory> categories = [

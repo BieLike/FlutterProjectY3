@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/page/create_import.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
@@ -12,10 +13,13 @@ class ManageImportPage extends StatefulWidget {
   State<ManageImportPage> createState() => _ManageImportPageState();
 }
 
+basePath bp = basePath();
+final String bpt = bp.bpath();
+
 class _ManageImportPageState extends State<ManageImportPage> {
   List data = [];
   List filteredData = [];
-  final String baseurl = "http://Localhost:3000"; // Update to match your IP
+  final String baseurl = bpt; // Update to match your IP
   TextEditingController txtSearch = TextEditingController();
   bool isLoading = false;
 

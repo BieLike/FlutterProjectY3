@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -39,10 +40,12 @@ class RolePage extends StatefulWidget {
   _RolePageState createState() => _RolePageState();
 }
 
+basePath bp = basePath();
+final String bpt = bp.bpath();
+
 class _RolePageState extends State<RolePage> {
   // Base URL for API - Replace with your server URL
-  static const String baseUrl =
-      'http://localhost:3000'; // Change to your server URL
+  final String baseUrl = bpt; // Change to your server URL
 
   List<RoleModel> roles = [];
   List<RoleModel> filteredRoles = [];

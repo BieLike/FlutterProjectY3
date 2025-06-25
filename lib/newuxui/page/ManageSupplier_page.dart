@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,14 +12,16 @@ class ManageSuppliersPage extends StatefulWidget {
   State<ManageSuppliersPage> createState() => _ManageSuppliersPageState();
 }
 
+basePath bp = basePath();
+final String bpt = bp.bpath();
+
 class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
   // Data lists
   List<dynamic> suppliers = [];
   List<dynamic> filteredSuppliers = [];
 
   // Base URL - Replace with your actual server URL
-  final String baseUrl =
-      "http://Localhost:3000"; // Match your existing baseurl
+  final String baseUrl = bpt; // Match your existing baseurl
 
   // Controllers for form fields
   final TextEditingController searchController = TextEditingController();

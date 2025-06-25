@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,10 +11,13 @@ class ManageUnitPage extends StatefulWidget {
   State<ManageUnitPage> createState() => _UnitPageState();
 }
 
+basePath bp = basePath();
+final String bpt = bp.bpath();
+
 class _UnitPageState extends State<ManageUnitPage> {
   List data = [];
   final String baseurl =
-      "http://Localhost:3000"; //localhost  /192.168.189.1 /ku http://192.168.189.224
+      bpt; //localhost  /192.168.189.1 /ku http://192.168.189.224
   TextEditingController txtSearch = TextEditingController();
   TextEditingController txtID = TextEditingController();
   TextEditingController txtName = TextEditingController();
@@ -251,7 +255,7 @@ class _UnitPageState extends State<ManageUnitPage> {
           ShowErrorMessage("This Unit already exists");
         } else {
           final respondBody = json.decode(response.body);
-          ShowErrorMessage(respondBody['msg'] ?? 
+          ShowErrorMessage(respondBody['msg'] ??
               "Failed to add unit. Status: ${response.statusCode}");
         }
       } catch (e) {
@@ -617,7 +621,8 @@ class _UnitPageState extends State<ManageUnitPage> {
                                           ShowDataDialog(UnitData: unit),
                                     ),
                                     IconButton(
-                                      icon: Icon(Icons.delete, color: Colors.red),
+                                      icon:
+                                          Icon(Icons.delete, color: Colors.red),
                                       onPressed: () => ShowDeleteConfirmation(
                                         unit['UnitID'].toString(),
                                         unit['UnitName'].toString(),

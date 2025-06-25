@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,10 +11,12 @@ class ManageUserPage extends StatefulWidget {
   State<ManageUserPage> createState() => _ManageUserPageState();
 }
 
+basePath bp = basePath();
+final String bpt = bp.bpath();
 class _ManageUserPageState extends State<ManageUserPage> {
   List data = [];
   List roles = []; // Store roles for dropdown
-  final String baseurl = "http://Localhost:3000";
+  final String baseurl = bpt;
 
   // Search controller
   TextEditingController txtSearch = TextEditingController();
