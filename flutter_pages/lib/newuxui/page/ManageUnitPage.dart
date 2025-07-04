@@ -183,15 +183,15 @@ class _UnitPageState extends State<ManageUnitPage> {
                 borderRadius: BorderRadius.circular(15),
               ),
               title: Text(
-                "Delete confirmation",
+                "ລົບຂໍ້ມູນ",
                 style: TextStyle(color: Color(0xFFE45C58)),
               ),
-              content: Text("You are now deleting '$Uname' ('$UID')"),
+              content: Text("ກຳລັງລົບຂໍ້ມູນ '$Uname' ('$UID')"),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
-                    "Cancel",
+                    "ຍົກເລີກ",
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ),
@@ -200,7 +200,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                     Navigator.of(context).pop();
                     DeleteUnit(UID);
                   },
-                  child: Text("Delete"),
+                  child: Text("ລຶບ"),
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
@@ -317,7 +317,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                 borderRadius: BorderRadius.circular(15),
               ),
               title: Text(
-                UnitData != null ? "Update Unit" : "Add Unit",
+                UnitData != null ? "ແກ້ໄຂຫົວໜ່ວຍ" : "ເພີ່ມຫົວໜ່ວຍ",
                 style: TextStyle(color: Color(0xFFE45C58)),
               ),
               content: Container(
@@ -335,8 +335,8 @@ class _UnitPageState extends State<ManageUnitPage> {
                               child: TextField(
                                 controller: txtID,
                                 decoration: InputDecoration(
-                                  labelText: 'Unit ID *',
-                                  hintText: 'Enter unit ID',
+                                  labelText: 'ID ຫົວໜ່ວຍ *',
+                                  hintText: 'ປ້ອນ ID ຫົວໜ່ວຍ',
                                   labelStyle:
                                       TextStyle(color: Color(0xFFE45C58)),
                                   border: OutlineInputBorder(
@@ -356,8 +356,8 @@ class _UnitPageState extends State<ManageUnitPage> {
                               child: TextField(
                                 controller: txtName,
                                 decoration: InputDecoration(
-                                  labelText: 'Unit Name *',
-                                  hintText: 'Enter unit name',
+                                  labelText: 'ຊື່ຫົວໜ່ວຍ *',
+                                  hintText: 'ປ້ອນຊື່ຫົວໜ່ວຍ',
                                   labelStyle:
                                       TextStyle(color: Color(0xFFE45C58)),
                                   border: OutlineInputBorder(
@@ -381,7 +381,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8.0),
                               child: Text(
-                                'Current Unit Details',
+                                'ລາຍລະອຽດຫົວໜ່ວຍປັດຈຸບັນ',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontWeight: FontWeight.bold,
@@ -396,7 +396,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                                     controller: txtID,
                                     enabled: false,
                                     decoration: InputDecoration(
-                                      labelText: 'Current ID',
+                                      labelText: ' ID ປັດຈຸບັນ',
                                       labelStyle:
                                           TextStyle(color: Colors.grey[600]),
                                       border: OutlineInputBorder(
@@ -414,7 +414,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                                     controller: txtName,
                                     enabled: false,
                                     decoration: InputDecoration(
-                                      labelText: 'Current Name',
+                                      labelText: 'ຊື່ປັດຈຸບັນ',
                                       labelStyle:
                                           TextStyle(color: Colors.grey[600]),
                                       border: OutlineInputBorder(
@@ -431,7 +431,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8.0),
                               child: Text(
-                                'New Unit Details (optional - leave empty to keep current)',
+                                'ລາຍລະອຽດຫົວໜ່ວຍໃໝ່(ທາງເລືອກ:ປ່ອຍຫວ່າງໄວ້ຖ້າຕ້ອງການໃຊ້ຕົວເກົ່າ)',
                                 style: TextStyle(
                                   color: Colors.green,
                                   fontWeight: FontWeight.bold,
@@ -445,8 +445,8 @@ class _UnitPageState extends State<ManageUnitPage> {
                                   child: TextField(
                                     controller: txtNewID,
                                     decoration: InputDecoration(
-                                      labelText: 'New ID',
-                                      hintText: 'Enter new unit ID',
+                                      labelText: 'ID ໃໝ່',
+                                      hintText: 'ປ້ອນ ID ຫົວໜ່ວຍໃໝ່',
                                       labelStyle:
                                           TextStyle(color: Colors.green),
                                       border: OutlineInputBorder(
@@ -466,8 +466,8 @@ class _UnitPageState extends State<ManageUnitPage> {
                                   child: TextField(
                                     controller: txtNewName,
                                     decoration: InputDecoration(
-                                      labelText: 'New Name',
-                                      hintText: 'Enter new unit name',
+                                      labelText: 'ຊື່ໃໝ່',
+                                      hintText: 'ປ້ອນຊື່ໃໝ່',
                                       labelStyle:
                                           TextStyle(color: Colors.green),
                                       border: OutlineInputBorder(
@@ -497,7 +497,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                     Navigator.of(context).pop();
                   },
                   child: Text(
-                    "Cancel",
+                    "ຍົກເລີກ",
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ),
@@ -509,7 +509,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                       AddUnit();
                     }
                   },
-                  child: Text(UnitData != null ? "Update" : "Add"),
+                  child: Text(UnitData != null ? "ແກ້ໄຂ" : "ເພີ່ມ"),
                   style: TextButton.styleFrom(
                     backgroundColor: Color(0xFFE45C58),
                     foregroundColor: Colors.white,
@@ -533,7 +533,7 @@ class _UnitPageState extends State<ManageUnitPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Units Management'),
+        title: Text('ຈັດການຫົວໜ່ວຍ'),
         backgroundColor: Color(0xFFE45C58),
         foregroundColor: Colors.white,
       ),
@@ -553,7 +553,7 @@ class _UnitPageState extends State<ManageUnitPage> {
               },
               controller: txtSearch,
               decoration: InputDecoration(
-                hintText: "Search units...",
+                hintText: "ຄົ້ນຫາ ຫົວໜ່ວຍ...",
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -570,7 +570,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                 : data.isEmpty
                     ? Center(
                         child: Text(
-                          "No units found",
+                          "ບໍ່ພົບຫົວໜ່ວຍ",
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       )

@@ -469,7 +469,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create New Import'),
+        title: Text('ສ້າງການນຳເຂົ້າ'),
         backgroundColor: Color(0xFFE45C58),
         foregroundColor: Colors.white,
         actions: [
@@ -496,21 +496,21 @@ class _CreateImportPageState extends State<CreateImportPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Import Header Section
-                            _buildSectionHeader('Import Information'),
+                            _buildSectionHeader('ຂໍ້ມູນການນຳເຂົ້າ'),
                             SizedBox(height: 12),
                             _buildImportHeaderSection(),
 
                             SizedBox(height: 24),
 
                             // Supplier Section
-                            _buildSectionHeader('Supplier Information'),
+                            _buildSectionHeader('ຂໍ້ມູນຜູ້ສະໜອງ'),
                             SizedBox(height: 12),
                             _buildSupplierSection(),
 
                             SizedBox(height: 24),
 
                             // Import Items Section
-                            _buildSectionHeader('Import Items'),
+                            _buildSectionHeader('ລາຍການນຳເຂົ້າ'),
                             SizedBox(height: 12),
                             _buildImportItemsSection(),
 
@@ -533,7 +533,8 @@ class _CreateImportPageState extends State<CreateImportPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addImportItem,
         icon: Icon(Icons.add, color: Colors.white),
-        label: Text('Add Import Item', style: TextStyle(color: Colors.white)),
+        label:
+            Text('ເພີ່ມລາຍການນຳເຂົ້າ', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFFE45C58),
       ),
     );
@@ -708,7 +709,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
             TextFormField(
               controller: _invoiceNumberController,
               decoration: InputDecoration(
-                labelText: 'Invoice Number (Optional)',
+                labelText: 'ໃບແຈ້ງໜີ້ (ທາງເລືອກ)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -737,12 +738,12 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 TextFormField(
                   controller: _supplierSearchController,
                   decoration: InputDecoration(
-                    labelText: 'Search Supplier Name *',
+                    labelText: 'ຄົ້ນຫາຊື່ຜູ້ສະໜອງ *',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     prefixIcon: Icon(Icons.search),
-                    hintText: 'Type supplier name...',
+                    hintText: 'ພິມຊື່ຜູ້ສະໜອງ...',
                     suffixIcon: _supplierNameController.text.isNotEmpty
                         ? IconButton(
                             icon: Icon(Icons.clear),
@@ -777,7 +778,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                         return ListTile(
                           dense: true,
                           title: Text(
-                            supplier['SupplierName'],
+                            supplier['ຊື່ຜູ້ສະໜອງ'] ?? 'N/A',
                             style: TextStyle(fontSize: 14),
                           ),
                           subtitle: Text(
@@ -798,7 +799,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
             TextFormField(
               controller: _supplierContactController,
               decoration: InputDecoration(
-                labelText: 'Supplier Contact (Optional)',
+                labelText: 'ການຕິດຕໍ່ຜູ້ສະໜອງ (ທາງເລືອກ)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -812,7 +813,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
             TextFormField(
               controller: _notesController,
               decoration: InputDecoration(
-                labelText: 'Notes (Optional)',
+                labelText: 'ໝາຍເຫດ (ທາງເລືອກ)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -843,7 +844,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'No import items added yet',
+                  'ຍັງບໍ່ມີລາຍການນຳເຂົ້າ',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -851,7 +852,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Tap "Add Import Item" to get started',
+                  'ກົດ "ເພີ່ມລາຍການນຳເຂົ້າ" ເພື່ອເລີ່ມຕົ້ນ',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],
@@ -908,12 +909,12 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 TextFormField(
                   controller: _getProductController(index),
                   decoration: InputDecoration(
-                    labelText: 'Search Product (ID or Name) *',
+                    labelText: 'ຄົ້ນຫາສິນຄ້າ (ID ຫຼື ຊື່) *',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     prefixIcon: Icon(Icons.search),
-                    hintText: 'Type product ID or name...',
+                    hintText: 'ພິມ ID ຫຼື ຊື່ສິນຄ້າ...',
                     suffixIcon: item['ProductID'].toString().isNotEmpty
                         ? IconButton(
                             icon: Icon(Icons.clear),
@@ -981,7 +982,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                   border: Border.all(color: Colors.blue[200]!),
                 ),
                 child: Text(
-                  'Current Stock: ${item['CurrentStock']} units',
+                  'ສິນຄ້າໃນສະຕັອກປັດຈຸບັນ: ${item['CurrentStock']} ',
                   style: TextStyle(
                     color: Colors.blue[800],
                     fontWeight: FontWeight.w500,
@@ -1000,7 +1001,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                   child: TextFormField(
                     initialValue: item['ImportQuantity'].toString(),
                     decoration: InputDecoration(
-                      labelText: 'Import Quantity *',
+                      labelText: 'ຈຳນວນການນຳເຂົ້າ *',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -1028,7 +1029,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                   child: TextFormField(
                     initialValue: item['ImportPrice'].toString(),
                     decoration: InputDecoration(
-                      labelText: 'Import Price *',
+                      labelText: 'ລາຄານຳເຂົ້າ *',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -1059,7 +1060,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
             TextFormField(
               initialValue: item['BatchNumber'].toString(),
               decoration: InputDecoration(
-                labelText: 'Batch Number (Optional)',
+                labelText: 'ເລກຊຸດສິນຄ້າ (ທາງເລືອກ)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1111,7 +1112,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Import Summary',
+              'ສະຫຼຸບການນຳເຂົ້າ',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -1123,7 +1124,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total Items:',
+                  'ຈຳນວນທັງໝົດ:',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 Text(
@@ -1137,7 +1138,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Grand Total:',
+                  'ຍອດລວມທັງໝົດ:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -1166,8 +1167,9 @@ class _CreateImportPageState extends State<CreateImportPage> {
                         ),
                       )
                     : Icon(Icons.save),
-                label: Text(
-                    _isSubmitting ? 'Creating Import...' : 'Create Import'),
+                label: Text(_isSubmitting
+                    ? 'ກຳລັງສ້າງການນຳເຂົ້າ...'
+                    : 'ສ້າງການນຳເຂົ້າ'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFE45C58),
                   foregroundColor: Colors.white,

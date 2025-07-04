@@ -373,13 +373,13 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete Confirmation"),
+        title: const Text("ຢືນຢັນການລຶບ"),
         content: Text(
-            "Are you sure you want to delete '$supplierName'?\n\nThis action cannot be undone."),
+            "ທ່ານແນ່ໃຈແລ້ວບໍວ່າຕ້ອງການລຶບ '$supplierName'?\n\nຖ້າລຶບໄປແລ້ວຈະບໍ່ສາມາດກູ້ຄືນໄດ້."),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Cancel"),
+            child: const Text("ຍົກເລີກ"),
           ),
           TextButton(
             onPressed: () {
@@ -389,7 +389,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text("Delete"),
+            child: const Text("ລຶບ"),
           ),
         ],
       ),
@@ -418,7 +418,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title:
-              Text(supplierData != null ? "Edit Supplier" : "Add New Supplier"),
+              Text(supplierData != null ? "ແກ້ໄຂຜູ້ສະໜອງ" : "ເພີ່ມຜູ້ສະໜອງໃໝ່"),
           content: SizedBox(
             width: 400,
             child: SingleChildScrollView(
@@ -429,10 +429,10 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                   TextField(
                     controller: supplierNameController,
                     decoration: InputDecoration(
-                      labelText: 'Supplier Name *',
+                      labelText: 'ຊື່ຜູ້ສະໜອງ*',
                       labelStyle: const TextStyle(color: Color(0xFFE45C58)),
                       border: const OutlineInputBorder(),
-                      hintText: 'Enter supplier name',
+                      hintText: 'ປ້ອນຊື່ຜູ້ສະໜອງ',
                     ),
                     textCapitalization: TextCapitalization.words,
                   ),
@@ -442,10 +442,10 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                   TextField(
                     controller: contactPersonController,
                     decoration: InputDecoration(
-                      labelText: 'Contact Person *',
+                      labelText: 'ຜູ້ຕິດຕໍ່*',
                       labelStyle: const TextStyle(color: Color(0xFFE45C58)),
                       border: const OutlineInputBorder(),
-                      hintText: 'Enter contact person name',
+                      hintText: 'ປ້ອນຊື່ຜູ້ຕິດຕໍ່',
                     ),
                     textCapitalization: TextCapitalization.words,
                   ),
@@ -455,10 +455,10 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                   TextField(
                     controller: phoneController,
                     decoration: InputDecoration(
-                      labelText: 'Phone *',
+                      labelText: 'ເບີໂທ *',
                       labelStyle: const TextStyle(color: Color(0xFFE45C58)),
                       border: const OutlineInputBorder(),
-                      hintText: 'Enter phone number',
+                      hintText: 'ປ້ອນເບີໂທ',
                       prefixIcon: const Icon(Icons.phone),
                     ),
                     keyboardType: TextInputType.phone,
@@ -476,7 +476,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                       labelText: 'Email',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       border: const OutlineInputBorder(),
-                      hintText: 'Enter email address (optional)',
+                      hintText: 'ປ້ອນ email address (ທາງເລືອກ)',
                       prefixIcon: const Icon(Icons.email),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -487,10 +487,10 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                   TextField(
                     controller: addressController,
                     decoration: InputDecoration(
-                      labelText: 'Address',
+                      labelText: 'ທີ່ຢູ່',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       border: const OutlineInputBorder(),
-                      hintText: 'Enter address (optional)',
+                      hintText: 'ປ້ອນທີ່ຢູ່ (ທາງເລືອກ)',
                       prefixIcon: const Icon(Icons.location_on),
                     ),
                     maxLines: 2,
@@ -501,7 +501,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                   // Status Dropdown
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
-                      labelText: 'Status',
+                      labelText: 'ສະຖານະ',
                       labelStyle: const TextStyle(color: Color(0xFFE45C58)),
                       border: const OutlineInputBorder(),
                     ),
@@ -523,7 +523,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
 
                   // Required fields note
                   const Text(
-                    '* Required fields',
+                    '* ຂໍ້ມູນທີ່ຈຳເປັນ',
                     style: TextStyle(
                       color: Color(0xFFE45C58),
                       fontSize: 12,
@@ -540,7 +540,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                 clearFormFields();
                 Navigator.of(context).pop();
               },
-              child: const Text("Cancel"),
+              child: const Text("ຍົກເລີກ"),
             ),
             TextButton(
               onPressed: isLoading
@@ -565,7 +565,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : Text(supplierData != null ? "Update" : "Add"),
+                  : Text(supplierData != null ? "ແກ້ໄຂ" : "ເພີ່ມ"),
             ),
           ],
         ),
@@ -589,7 +589,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Supplier Management'),
+        title: const Text('ຈັດການຜູ້ສະໜອງ'),
         backgroundColor: const Color(0xFFE45C58),
         foregroundColor: Colors.white,
         elevation: 2,
@@ -613,7 +613,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: "Search suppliers...",
+                hintText: "ຄົ້ນຫາຜູ້ສະໜອງ...",
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: searchController.text.isNotEmpty
                     ? IconButton(
@@ -650,7 +650,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                               AlwaysStoppedAnimation<Color>(Color(0xFFE45C58)),
                         ),
                         SizedBox(height: 16),
-                        Text("Loading suppliers..."),
+                        Text("ກຳລັງຄົ້ນຫາ..."),
                       ],
                     ),
                   )
@@ -667,8 +667,8 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                             const SizedBox(height: 16),
                             Text(
                               searchController.text.isEmpty
-                                  ? "No suppliers found"
-                                  : "No suppliers match your search",
+                                  ? "ບໍ່ມີຜູ້ສະໜອງ"
+                                  : "ບໍ່ມີຜູ້ສະໜອງທີ່ກົງກັບການຄົ້ນຫາຂອງທ່ານ",
                               style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.grey[600],
@@ -677,8 +677,8 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                             const SizedBox(height: 8),
                             Text(
                               searchController.text.isEmpty
-                                  ? "Add your first supplier to get started"
-                                  : "Try a different search term",
+                                  ? "ເພີ່ມຜູ້ສະໜອງຄົ້ນຫາຂອງທ່ານ"
+                                  : "ລອງຄົ້ນຫາດ້ວຍຄຳຄົ້ນຫາອື່ນ",
                               style: TextStyle(
                                 color: Colors.grey[500],
                               ),

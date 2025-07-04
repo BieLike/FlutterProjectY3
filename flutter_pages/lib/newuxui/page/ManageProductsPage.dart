@@ -14,14 +14,14 @@ class ManageProductsPage extends StatefulWidget {
 
 basePath bp = basePath();
 final String bpt = bp.bpath();
+
 class _ProductPageState extends State<ManageProductsPage> {
   List data = [];
   List Udata = [];
   List Cdata = [];
   String? selectedUnit;
   String? selectedCategory;
-  final String baseurl =
-      bpt; //localhost  /pe 192.168.189.1
+  final String baseurl = bpt; //localhost  /pe 192.168.189.1
   TextEditingController txtSearch = TextEditingController();
   TextEditingController txtID = TextEditingController();
   TextEditingController txtName = TextEditingController();
@@ -207,7 +207,7 @@ class _ProductPageState extends State<ManageProductsPage> {
   void ShowDataDialog({Map<String, dynamic>? ProductData}) async {
     await FetchUnitData();
     await FetchCategoryData();
-    
+
     if (ProductData != null) {
       txtID.text = ProductData['ProductID'].toString();
       txtNewID.text = "";
@@ -378,7 +378,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtName,
                         decoration: InputDecoration(
-                          labelText: 'Name',
+                          labelText: 'ຊື່',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -397,7 +397,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtNewID,
                         decoration: InputDecoration(
-                          labelText: 'New ID ',
+                          labelText: 'ID ໃໝ່',
                           labelStyle: TextStyle(
                             color: ProductData != null
                                 ? Colors.green.shade500
@@ -413,7 +413,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtNewName,
                         decoration: InputDecoration(
-                          labelText: 'New Name',
+                          labelText: 'ຊື່ໃໝ່',
                           labelStyle: TextStyle(
                             color: ProductData != null
                                 ? Colors.green.shade500
@@ -434,7 +434,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtQty,
                         decoration: InputDecoration(
-                          labelText: 'Qty',
+                          labelText: 'ຈຳນວນ',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -448,7 +448,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtImP,
                         decoration: InputDecoration(
-                          labelText: 'ImportPrice',
+                          labelText: 'ລາຄານຳເຂົ້າ',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -462,7 +462,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtSP,
                         decoration: InputDecoration(
-                          labelText: 'SellPrice',
+                          labelText: 'ລາຄາຂາຍ',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -479,7 +479,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: 'Unit',
+                          labelText: 'ຫົວໜ່ວຍ',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -503,7 +503,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: 'Category',
+                          labelText: 'ປະເພດ',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -532,7 +532,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtBal,
                         decoration: InputDecoration(
-                          labelText: 'Balance',
+                          labelText: 'ຍອດລວມຈຳນວນການນຳເຂົ້າ',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -546,7 +546,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                       child: TextField(
                         controller: txtLvl,
                         decoration: InputDecoration(
-                          labelText: 'Level',
+                          labelText: 'ຈຳນວນຂັ້ນຕໍ່າຂອງສິນຄ້າທີ່ຄວນມີ',
                           labelStyle: TextStyle(
                             color: Colors.red,
                           ),
@@ -568,7 +568,7 @@ class _ProductPageState extends State<ManageProductsPage> {
               clearAText();
               Navigator.of(context).pop();
             },
-            child: Text("Cancel"),
+            child: Text("ຍົກເລີກ"),
           ),
           TextButton(
             onPressed: () {
@@ -621,7 +621,7 @@ class _ProductPageState extends State<ManageProductsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Products Management'),
+        title: Text('ຈັດການສິນຄ້າ'),
         backgroundColor: Color(0xFFE45C58),
       ),
       drawer: AppDrawer(),
@@ -640,7 +640,7 @@ class _ProductPageState extends State<ManageProductsPage> {
               },
               controller: txtSearch,
               decoration: InputDecoration(
-                hintText: "Search products...",
+                hintText: "ຄົ້ນຫາສິນຄ້າ...",
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -701,7 +701,8 @@ class _ProductPageState extends State<ManageProductsPage> {
                                       children: [
                                         IconButton(
                                           icon: Icon(Icons.edit,
-                                              color: Color(0xFFE45C58), size: 20),
+                                              color: Color(0xFFE45C58),
+                                              size: 20),
                                           onPressed: () => ShowDataDialog(
                                               ProductData: product),
                                         ),
@@ -731,7 +732,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  'Qty: ${product['Quantity']}',
+                                  'ຈຳນວນ: ${product['Quantity']}',
                                   style: TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
@@ -739,7 +740,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                                   ),
                                 ),
                                 Text(
-                                  'Price: \$${product['SellPrice']}',
+                                  'ລາຄາ: \$${product['SellPrice']}',
                                   style: TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
@@ -747,7 +748,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                                   ),
                                 ),
                                 Text(
-                                  'Unit: ${product['UnitName'] ?? 'N/A'}',
+                                  'ຫົວໜ່ວຍ: ${product['UnitName'] ?? 'N/A'}',
                                   style: TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
@@ -757,7 +758,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  'Balance: ${product['Balance']}',
+                                  'ຍອດລວມຈຳນວນການນຳເຂົ້າ: ${product['Balance']}',
                                   style: TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
@@ -765,7 +766,7 @@ class _ProductPageState extends State<ManageProductsPage> {
                                   ),
                                 ),
                                 Text(
-                                  'Level: ${product['Level']}',
+                                  'ຈຳນວນຂັ້ນຕໍ່າຂອງສິນຄ້າທີ່ຄວນມີ: ${product['Level']}',
                                   style: TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
