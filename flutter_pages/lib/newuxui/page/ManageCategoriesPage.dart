@@ -13,10 +13,10 @@ class ManageCategoriesPage extends StatefulWidget {
 
 basePath bp = basePath();
 final String bpt = bp.bpath();
+
 class _CategoryPageState extends State<ManageCategoriesPage> {
   List data = [];
-  final String baseurl =
-      bpt; //localhost  /pe 192.168.189.1
+  final String baseurl = bpt; //localhost  /pe 192.168.189.1
   TextEditingController txtSearch = TextEditingController();
   TextEditingController txtNewID = TextEditingController();
   TextEditingController txtNewName = TextEditingController();
@@ -148,15 +148,15 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                 borderRadius: BorderRadius.circular(15),
               ),
               title: Text(
-                "Delete confirmation",
+                "ລຶບຂໍ້ມູນ",
                 style: TextStyle(color: Color(0xFFE45C58)),
               ),
-              content: Text("You now deleting '$Cname' ('$CID')"),
+              content: Text("ກຳລັງລົບຂໍ້ມູນ '$Cname' ('$CID')"),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
-                    "Cancel",
+                    "ຍົກເລີກ",
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ),
@@ -165,7 +165,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                     Navigator.of(context).pop();
                     DeleteCategory(CID);
                   },
-                  child: Text("Delete"),
+                  child: Text("ລຶບ"),
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
@@ -313,7 +313,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                             child: TextField(
                               controller: txtName,
                               decoration: InputDecoration(
-                                labelText: 'Name',
+                                labelText: 'ຊື່',
                                 labelStyle: TextStyle(color: Colors.red),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -337,7 +337,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                             child: TextField(
                               controller: txtNewID,
                               decoration: InputDecoration(
-                                labelText: 'New ID',
+                                labelText: 'ID ໃໝ່',
                                 labelStyle: TextStyle(
                                   color: CatData != null
                                       ? Colors.green.shade500
@@ -361,7 +361,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                             child: TextField(
                               controller: txtNewName,
                               decoration: InputDecoration(
-                                labelText: 'New Name',
+                                labelText: 'ຊື່ໃໝ່',
                                 labelStyle: TextStyle(
                                   color: CatData != null
                                       ? Colors.green.shade500
@@ -392,7 +392,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                     Navigator.of(context).pop();
                   },
                   child: Text(
-                    "Cancel",
+                    "ຍົກເລີກ",
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ),
@@ -404,7 +404,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                       AddCategory();
                     }
                   },
-                  child: Text(CatData != null ? "Update" : "Add"),
+                  child: Text(CatData != null ? "ແກ້ໄຂ" : "ເພີ່ມ"),
                   style: TextButton.styleFrom(
                     backgroundColor: Color(0xFFE45C58),
                     foregroundColor: Colors.white,
@@ -428,7 +428,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Categories Management'),
+        title: Text('ຈັດການປະເພດສິນຄ້າ'),
         backgroundColor: Color(0xFFE45C58),
       ),
       drawer: AppDrawer(),
@@ -447,7 +447,7 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
               },
               controller: txtSearch,
               decoration: InputDecoration(
-                hintText: "Search categories...",
+                hintText: "ຄົ້ນຫາປະເພດສິນຄ້າ...",
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),

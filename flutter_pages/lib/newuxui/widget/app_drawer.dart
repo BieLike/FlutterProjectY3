@@ -6,10 +6,9 @@ import 'package:flutter_lect2/newuxui/page/ManageRole.dart';
 import 'package:flutter_lect2/newuxui/page/ManageSupplier_page.dart';
 import 'package:flutter_lect2/newuxui/page/ManageUnitPage.dart';
 import 'package:flutter_lect2/newuxui/page/ManageUser.dart';
-import 'package:flutter_lect2/newuxui/page/SalesHistoryPage.dart';
 import 'package:flutter_lect2/newuxui/page/SettingsPage.dart';
-import 'package:flutter_lect2/newuxui/page/home_page.dart';
-import 'package:flutter_lect2/newuxui/page/login_screen.dart';
+import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
+import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
 import 'package:flutter_lect2/newuxui/page/shortImp.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -51,11 +50,11 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.home),
-            title: Text('ໜ້າຫຼັກ'),
+            title: Text('ຂາຍສິນຄ້າ'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => nHomePage()));
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => SalePage()));
             },
           ),
           ListTile(
@@ -87,17 +86,6 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context);
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ManageUnitPage()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.point_of_sale),
-            title: Text('ການຂາຍ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SalesHistoryPage()),
-              );
             },
           ),
           ListTile(

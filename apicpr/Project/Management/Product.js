@@ -150,49 +150,66 @@ app.put("/product/:pid", (req, res) => {
 });
 
 
-app.post("/product/sell", async (req,res)=>{
-    try{
-        const items = req.body
-        const {Date, Time, Subtotal, GrandTotal, Money, Change, PaymentMethod, Employee, Member} = req.body[0]
-        const sql = "update tbproduct set Quantity = Quantity - ? where ProductID = ?"
-        const sellDsql = "insert into tbselldetail value(?, ?, ?, ?, ?)"
-        const sellsql = "insert into tbsell value(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname()};
-                for(const item of items){
-                    const {ProductID, SellQty} = item
-                    console.log("Checking product:", ProductID);
-                    const productRows = await queryAsync("select Quantity from tbproduct where ProductID = ?", [ProductID])
-                    console.log("Query result:", productRows);
-                    if(productRows.length < 0){
-                        return res.status(400).send({msg: "Product "+ProductID+" not found", clientInfo})
-                    }
-                    if(productRows[0].Quantity < SellQty){
-                        return res.status(400).send({msg: "Not enough stock for sell", clientInfo })
-                    }
-                }
-                const sellResult = await queryAsync(
-                    sellsql, [Date, Time, Subtotal, GrandTotal, Money, Change, PaymentMethod, Employee, Member]
-                );
-                const sellID = sellResult.insertId;
-                for (const item of items){
-                    const {ProductID, SellQty, Price, Total} = item;
+app.post("/product/sell", async (req, res) => {
+    try {
+        const items = req.body.SaleDetails; // ດຶງ items ຈາກ SaleDetails
+        const { Date, Time, Subtotal, GrandTotal, Money, Change, PaymentMethod, Employee, Member } = req.body; // ດຶງຂໍ້ມູນຈາກ Body ໂດຍກົງ
+        
+        const sql = "update tbproduct set Quantity = Quantity - ? where ProductID = ?";
+        const sellDsql = "insert into tbselldetail (SellID, ProductID, Price, Quantity, Total) value(?, ?, ?, ?, ?)";
+        const sellsql = "insert into tbsell (Date, Time, SubTotal, GrandTotal, Money, ChangeTotal, PaymentMethod, EmployeeID, MemberID) value(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() };
 
-                    await queryAsync(
-                        sellDsql, [sellID, ProductID, Price, SellQty, Total]
-                    )
-                    
-                    await queryAsync(
-                        sql, [SellQty, ProductID]
-                    )
-                }
-                return res.status(200).send({msg: "Sale complete",clientInfo })
-    }catch(err){
-        console.log(err)
+        // ກວດສອບສະຕັອກສິນຄ້າ
+        for (const item of items) {
+            const { ProductID, SellQty } = item;
+            console.log("Checking product:", ProductID);
+            const productRows = await queryAsync("select Quantity from tbproduct where ProductID = ?", [ProductID]);
+            console.log("Query result:", productRows);
+            if (productRows.length === 0) { 
+                return res.status(404).send({ msg: "Product " + ProductID + " not found", clientInfo });
+            }
+            if (productRows[0].Quantity < SellQty) {
+                return res.status(400).send({ msg: "Not enough stock for sale", clientInfo });
+            }
+        }
+        
+        // ບັນທຶກຂໍ້ມູນ
+        const sellResult = await queryAsync(
+            sellsql, [Date, Time, Subtotal, GrandTotal, Money, Change, PaymentMethod, Employee, Member]
+        );
+        const sellID = sellResult.insertId;
+
+        for (const item of items) {
+            const { ProductID, SellQty, Price, Total } = item;
+            await queryAsync(
+                sellDsql, [sellID, ProductID, Price, SellQty, Total]
+            );
+            await queryAsync(
+                sql, [SellQty, ProductID]
+            );
+        }
+
+       
+        // ສ້າງ Object ຂໍ້ມູນສົ່ງໄປໜ້າ BillPage
+        const transactionDataForBill = {
+            ...req.body, // ເອົາຂໍ້ມູນທັງໝົດທີ່ສົ່ງມາ
+            SellID: sellID // ເພີ່ມ SellID ທີ່ສ້າງເຂົ້າໄປ
+        };
+        
+        return res.status(200).send({ 
+            msg: "Sale complete",
+            transactionData: transactionDataForBill, // ສົ່ງຂໍ້ມູນກັບໄປ
+            clientInfo 
+        });
+
+    } catch (err) {
+        console.log(err);
         return res.status(500).send({
-            "msg":"Path to database not found"
-            })
+            "msg": "Path to database not found"
+        });
     }
-})
+});
 
 app.put("/product/import/:pid", (req,res)=>{
     try{

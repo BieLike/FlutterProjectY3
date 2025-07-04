@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
+import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -226,11 +227,11 @@ class _RolePageState extends State<RolePage> {
         return AlertDialog(
           backgroundColor: Colors.white,
           title: Text(
-            'Confirm Delete',
+            'ຢືນຢັນການລຶບ',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           content: Text(
-            'Are you sure you want to delete this role?',
+            'ທ່ານແນ່ໃຈບໍ່ວ່າຈະລຶບຕຳແໜ່ງນີ້?',
             style: TextStyle(color: Colors.black),
           ),
           actions: [
@@ -314,7 +315,7 @@ class _RolePageState extends State<RolePage> {
                   TextFormField(
                     controller: _ridController,
                     decoration: InputDecoration(
-                      labelText: 'Role ID *',
+                      labelText: 'ID ຕຳແໜ່ງ *',
                       labelStyle: TextStyle(color: Colors.grey[700]),
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
@@ -346,7 +347,7 @@ class _RolePageState extends State<RolePage> {
                   TextFormField(
                     controller: _roleNameController,
                     decoration: InputDecoration(
-                      labelText: 'Role Name *',
+                      labelText: 'ຊື່ຕຳແໜ່ງ *',
                       labelStyle: TextStyle(color: Colors.grey[700]),
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
@@ -370,7 +371,7 @@ class _RolePageState extends State<RolePage> {
                   TextFormField(
                     controller: _baseSalaryController,
                     decoration: InputDecoration(
-                      labelText: 'Base Salary *',
+                      labelText: 'ເງິນເດືອນພື້ນຖານ *',
                       labelStyle: TextStyle(color: Colors.grey[700]),
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
@@ -407,7 +408,7 @@ class _RolePageState extends State<RolePage> {
                 _clearForm();
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+              child: Text('ຍົກເລີກ', style: TextStyle(color: Colors.grey[600])),
             ),
             ElevatedButton(
               onPressed: isLoading
@@ -469,7 +470,7 @@ class _RolePageState extends State<RolePage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Role Management',
+          'ຈັດການຕຳແໜ່ງ',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -479,6 +480,7 @@ class _RolePageState extends State<RolePage> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.white),
       ),
+      drawer: AppDrawer(),
       body: Column(
         children: [
           // Search bar
@@ -498,7 +500,7 @@ class _RolePageState extends State<RolePage> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search by Role ID or Name...',
+                hintText: 'ຄົ້ນຫາຕຳແໜ່ງດ້ວຍ ID ຫຼື ຕຳແໜ່ງ...',
                 hintStyle: TextStyle(color: Colors.grey[600]),
                 prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                 border: OutlineInputBorder(
@@ -538,8 +540,8 @@ class _RolePageState extends State<RolePage> {
                             SizedBox(height: 16),
                             Text(
                               _searchController.text.isEmpty
-                                  ? 'No roles found'
-                                  : 'No roles match your search',
+                                  ? 'ບໍ່ມີຕຳແໜ່ງທີ່ຄົ້ນຫາ'
+                                  : 'ບໍ່ມີຕຳແໜ່ງທີ່ເຂົ້າກັບການຄົ້ນຫາ',
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 16,
@@ -580,7 +582,7 @@ class _RolePageState extends State<RolePage> {
                                   ),
                                 ),
                                 subtitle: Text(
-                                  'Base Salary: \$${role.baseSalary.toString()}',
+                                  'ເງິນເດືອນພື້ນຖານ: \$${role.baseSalary.toString()}',
                                   style: TextStyle(color: Colors.grey[700]),
                                 ),
                                 trailing: Row(
@@ -592,14 +594,14 @@ class _RolePageState extends State<RolePage> {
                                           color: Colors.blue[600]),
                                       onPressed: () =>
                                           _showRoleDialog(role: role),
-                                      tooltip: 'Edit Role',
+                                      tooltip: 'ແກ້ໄຂຕຳແໜ່ງ',
                                     ),
                                     // Delete button
                                     IconButton(
                                       icon: Icon(Icons.delete,
                                           color: Colors.red[600]),
                                       onPressed: () => deleteRole(role.rid),
-                                      tooltip: 'Delete Role',
+                                      tooltip: 'ລຶບຕຳແໜ່ງ',
                                     ),
                                   ],
                                 ),
@@ -617,7 +619,7 @@ class _RolePageState extends State<RolePage> {
         onPressed: () => _showRoleDialog(),
         backgroundColor: Colors.red[300],
         child: Icon(Icons.add, color: Colors.white),
-        tooltip: 'Add New Role',
+        tooltip: 'ເພີ່ມຕຳແໜ່ງໃໝ່',
       ),
     );
   }

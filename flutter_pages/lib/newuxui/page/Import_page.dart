@@ -313,7 +313,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Import Details',
+                            'ລາຍລະອຽດການນຳເຂົ້າ',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -373,7 +373,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Import Information',
+                                        'ຂໍ້ມູນການນຳເຂົ້າ',
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
@@ -381,17 +381,17 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                         ),
                                       ),
                                       SizedBox(height: 12),
-                                      _InfoRow('Import ID:',
+                                      _InfoRow('ID ນຳເຂົ້າ:',
                                           header['ImportID'].toString()),
-                                      _InfoRow('Date:',
+                                      _InfoRow('ວັນທີ:',
                                           FormatDate(header['ImportDate'])),
-                                      _InfoRow('Time:',
+                                      _InfoRow('ເວລາ:',
                                           header['ImportTime'] ?? 'N/A'),
-                                      _InfoRow('Invoice Number:',
+                                      _InfoRow('ໃບແຈ້ງໜີ້:',
                                           header['InvoiceNumber'] ?? 'N/A'),
-                                      _InfoRow('Total Items:',
+                                      _InfoRow('ຈຳນວນທັງໝົດ:',
                                           header['TotalItems'].toString()),
-                                      _InfoRow('Total Cost:',
+                                      _InfoRow('ລາຄາລວມ:',
                                           FormatCurrency(header['TotalCost'])),
                                     ],
                                   ),
@@ -409,7 +409,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Supplier Information',
+                                        'ຂໍ້ມູນຜູ້ສະໜອງ',
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
@@ -417,12 +417,12 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                         ),
                                       ),
                                       SizedBox(height: 12),
-                                      _InfoRow('Supplier:',
+                                      _InfoRow('ຜູ້ສະໜອງ:',
                                           header['SupplierName'] ?? 'N/A'),
-                                      _InfoRow('Contact Person:',
+                                      _InfoRow('ຜູ້ຕິດຕໍ່:',
                                           header['ContactPerson'] ?? 'N/A'),
                                       _InfoRow(
-                                          'Phone:', header['Phone'] ?? 'N/A'),
+                                          'ເບີໂທ:', header['Phone'] ?? 'N/A'),
                                       _InfoRow(
                                           'Email:', header['Email'] ?? 'N/A'),
                                       if (header['Notes'] != null &&
@@ -441,7 +441,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Import Items',
+                                    'ລາຍການນຳເຂົ້າ',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -496,7 +496,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Items checked: ${itemChecked.values.where((checked) => checked).length}/${itemChecked.length}',
+                                      'ສິນຄ້າທີ່ກວດສອບແລ້ວ: ${itemChecked.values.where((checked) => checked).length}/${itemChecked.length}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         color: Colors.grey[700],
@@ -505,7 +505,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                     if (itemChecked.values
                                         .any((checked) => checked))
                                       Text(
-                                        'Ready for confirmation',
+                                        'ລໍຖ້າການຢືນຢັນ',
                                         style: TextStyle(
                                           color: Colors.green[600],
                                           fontWeight: FontWeight.w500,
@@ -628,7 +628,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                                   keyboardType:
                                                       TextInputType.number,
                                                   decoration: InputDecoration(
-                                                    labelText: 'Received Qty',
+                                                    labelText: 'ຈຳນວນທີ່ໄດ້ຮັບ',
                                                     border:
                                                         OutlineInputBorder(),
                                                     contentPadding:
@@ -655,7 +655,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                               SizedBox(width: 8),
                                               Expanded(
                                                 child: Text(
-                                                    'Expected: ${detail['ImportQuantity']}'),
+                                                    'ຄາດໝາຍ: ${detail['ImportQuantity']}'),
                                               ),
                                               Checkbox(
                                                 value: isChecked,
@@ -782,7 +782,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                         children: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: Text('Close'),
+                            child: Text('ປິດ'),
                             style: TextButton.styleFrom(
                               backgroundColor: Colors.grey[300],
                               foregroundColor: Colors.black,
@@ -793,7 +793,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                           ElevatedButton(
                             onPressed: () =>
                                 _confirmChanges(header['ImportID']),
-                            child: Text('Confirm Changes'),
+                            child: Text('ຢືນຢັນການປ່ຽນແປງ'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFE45C58),
                               foregroundColor: Colors.white,
@@ -843,7 +843,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Change Status'),
+        title: Text('ປ່ຽນສະຖານະ'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: ['Pending', 'Completed', 'Cancelled'].map((status) {
@@ -915,25 +915,25 @@ class _ManageImportPageState extends State<ManageImportPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Confirm Changes'),
+        title: Text('ຢືນຢັນການປ່ຽນແປງ'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Are you sure you want to make these changes?'),
+            Text('ເຈົົ້າແນ່ໃນທີ່ຈະປ່ຽນແປງບໍ?'),
             SizedBox(height: 16),
-            Text('Status: $tempStatus',
+            Text('ສະຖານະ: $tempStatus',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            Text('Matched items: $matchedItems'),
-            Text('Not matched items: $notMatchedItems'),
-            Text('Zero quantity items: $zeroItems'),
+            Text('ສິນຄ້າທີ່ກົງກັນ: $matchedItems'),
+            Text('ສິນຄ້າທີ່ບໍ່ກົງກັນ: $notMatchedItems'),
+            Text('ສິນຄ້າທີ່ບໍ່ມີຈຳນວນ: $zeroItems'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'),
+            child: Text('ຍົກເລີກ'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -975,7 +975,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Import Management'),
+        title: Text('ຈັດການການນຳເຂົ້າ'),
         backgroundColor: Color(0xFFE45C58),
         foregroundColor: Colors.white,
         actions: [
@@ -1003,7 +1003,8 @@ class _ManageImportPageState extends State<ManageImportPage> {
                   controller: txtSearch,
                   onChanged: (value) => FilterImports(),
                   decoration: InputDecoration(
-                    hintText: "Search by supplier, invoice, or import ID...",
+                    hintText:
+                        "ຄົ້ນຫາຕາມຜູ້ສະໜອງ, ໃບແຈ້ງໜີ້, ຫຼື ID ການນຳເຂົ້າ...",
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -1022,7 +1023,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                       child: DropdownButtonFormField<String>(
                         value: selectedStatus,
                         decoration: InputDecoration(
-                          labelText: 'Status',
+                          labelText: 'ສະຖານະ',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -1106,7 +1107,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                             ),
                             SizedBox(height: 16),
                             Text(
-                              "No imports found",
+                              "ບໍ່ພົບເຫັນການນຳເຂັ້າ",
                               style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.grey[600],
@@ -1115,7 +1116,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              "Try adjusting your search or filters",
+                              "ລອງແກ້ໄຂການຄົ້ນຫາ ຫຼື ປ່ອນຂໍ້ມູນໃໝ່",
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[500],
@@ -1158,7 +1159,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  'Import #${import['ImportID']}',
+                                                  'ນຳເຂົ້າ #${import['ImportID']}',
                                                   style: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.bold,
@@ -1254,7 +1255,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                                             ),
                                             SizedBox(width: 4),
                                             Text(
-                                              'Invoice: ${import['InvoiceNumber']}',
+                                              'ໃບແຈ້ງໜີ້: ${import['InvoiceNumber']}',
                                               style: TextStyle(
                                                 color: Colors.grey[600],
                                                 fontSize: 12,
@@ -1284,7 +1285,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
           );
         },
         icon: Icon(Icons.add, color: Colors.white),
-        label: Text('New Import', style: TextStyle(color: Colors.white)),
+        label: Text('ການນຳເຂົ້າໃໝ່', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFFE45C58),
       ),
     );

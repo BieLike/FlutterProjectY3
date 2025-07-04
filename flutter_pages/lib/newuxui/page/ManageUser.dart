@@ -13,6 +13,7 @@ class ManageUserPage extends StatefulWidget {
 
 basePath bp = basePath();
 final String bpt = bp.bpath();
+
 class _ManageUserPageState extends State<ManageUserPage> {
   List data = [];
   List roles = []; // Store roles for dropdown
@@ -171,20 +172,19 @@ class _ManageUserPageState extends State<ManageUserPage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Text("Delete confirmation",
-            style: TextStyle(color: Color(0xFFE45C58))),
-        content: Text("You are now deleting '$fname $lname' (ID: $uid)"),
+        title: Text("ລຶບຂໍ້ມູນ", style: TextStyle(color: Color(0xFFE45C58))),
+        content: Text("ກຳລັງລຶບຂໍ້ມູນ '$fname $lname' (ID: $uid)"),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text("Cancel", style: TextStyle(color: Colors.grey[600])),
+            child: Text("ຍົກເລີກ", style: TextStyle(color: Colors.grey[600])),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               DeleteUser(uid);
             },
-            child: Text("Delete"),
+            child: Text("ລຶບ"),
             style: TextButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
@@ -360,7 +360,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Text(
-          userData != null ? "Update User" : "Add User",
+          userData != null ? "ແກ້ໄຂຜູ້ໃຊ້" : "ເພີ່ມຜູ້ໃຊ້",
           style: TextStyle(color: Color(0xFFE45C58)),
         ),
         content: Container(
@@ -376,7 +376,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                       child: TextField(
                         controller: txtFname,
                         decoration: InputDecoration(
-                          labelText: 'First Name *',
+                          labelText: 'ຊື່ *',
                           labelStyle: TextStyle(color: Color(0xFFE45C58)),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10)),
@@ -392,7 +392,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                       child: TextField(
                         controller: txtLname,
                         decoration: InputDecoration(
-                          labelText: 'Last Name *',
+                          labelText: 'ນາມສະກຸນ *',
                           labelStyle: TextStyle(color: Color(0xFFE45C58)),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10)),
@@ -411,7 +411,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                 TextField(
                   controller: txtDOB,
                   decoration: InputDecoration(
-                    labelText: 'Date of Birth',
+                    labelText: 'ວັນ,ເດືອນ,ປີເກີດ',
                     labelStyle: TextStyle(color: Colors.grey[600]),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
@@ -427,7 +427,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                 DropdownButtonFormField<String>(
                   value: selectedGender,
                   decoration: InputDecoration(
-                    labelText: 'Gender *',
+                    labelText: 'ເພດ *',
                     labelStyle: TextStyle(color: Color(0xFFE45C58)),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
@@ -436,7 +436,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                       borderSide: BorderSide(color: Color(0xFFE45C58)),
                     ),
                   ),
-                  items: ['ຊາຍ', 'ຍິງ', 'ເດິຣອກສົງໃສ'].map((String value) {
+                  items: ['ຊາຍ', 'ຍິງ', 'ບໍ່ລະບຸ'].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -458,7 +458,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                         controller: txtPhone,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
-                          labelText: 'Phone *',
+                          labelText: 'ເບີໂທ *',
                           labelStyle: TextStyle(color: Color(0xFFE45C58)),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10)),
@@ -494,7 +494,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                 DropdownButtonFormField<int>(
                   value: selectedPosition,
                   decoration: InputDecoration(
-                    labelText: 'Position *',
+                    labelText: 'ຕຳແໜ່ງ *',
                     labelStyle: TextStyle(color: Color(0xFFE45C58)),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
@@ -522,7 +522,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                   controller: txtPassword,
                   obscureText: true,
                   decoration: InputDecoration(
-                    labelText: 'Password *',
+                    labelText: 'ລະຫັດຜ່ານ *',
                     labelStyle: TextStyle(color: Color(0xFFE45C58)),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
@@ -542,7 +542,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
               clearFields();
               Navigator.of(context).pop();
             },
-            child: Text("Cancel", style: TextStyle(color: Colors.grey[600])),
+            child: Text("ຍົກເລີກ", style: TextStyle(color: Colors.grey[600])),
           ),
           TextButton(
             onPressed: () {
@@ -581,7 +581,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Users Management'),
+        title: Text('ຈັດການຜູ້ໃຊ້'),
         backgroundColor: Color(0xFFE45C58),
         foregroundColor: Colors.white,
       ),
@@ -601,7 +601,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
               },
               controller: txtSearch,
               decoration: InputDecoration(
-                hintText: "Search users...",
+                hintText: "ຄົ້ນຫາຜູ້ໃຊ້...",
                 prefixIcon: Icon(Icons.search),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -618,7 +618,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
                 : data.isEmpty
                     ? Center(
                         child: Text(
-                          "No users found",
+                          "ບໍ່ມີຜູ້ໃຊ້",
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       )
