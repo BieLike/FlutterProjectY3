@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_lect2/newuxui/DBpath.dart';
-import 'package:flutter_lect2/newuxui/page/salepage/Payment_page.dart';
-import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+import 'package:flutter_application_1/newuxui/DBpath.dart';
+import 'package:flutter_application_1/newuxui/page/salepage/Payment_page.dart';
+import 'package:flutter_application_1/newuxui/widget/app_drawer.dart';
+// import 'package:flutter_lect2/newuxui/DBpath.dart';
+// import 'package:flutter_lect2/newuxui/page/salepage/Payment_page.dart';
+// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
 class SalePage extends StatefulWidget {
@@ -40,10 +43,7 @@ class _SalePageState extends State<SalePage> {
   // --- Data Fetching ---
   Future<void> _loadInitialData() async {
     setState(() => isLoading = true);
-    await Future.wait([
-      _fetchProducts(),
-      _fetchCategories(),
-    ]);
+    await Future.wait([_fetchProducts(), _fetchCategories()]);
     setState(() => isLoading = false);
   }
 
@@ -74,13 +74,14 @@ class _SalePageState extends State<SalePage> {
   void _filterProducts() {
     setState(() {
       displayedProducts = allProducts.where((product) {
-        final bool categoryMatch = selectedCategoryId == null ||
+        final bool categoryMatch =
+            selectedCategoryId == null ||
             product['CategoryID'] == selectedCategoryId;
-        final bool searchMatch = searchController.text.isEmpty ||
-            product['ProductName']
-                .toString()
-                .toLowerCase()
-                .contains(searchController.text.toLowerCase());
+        final bool searchMatch =
+            searchController.text.isEmpty ||
+            product['ProductName'].toString().toLowerCase().contains(
+              searchController.text.toLowerCase(),
+            );
         return categoryMatch && searchMatch;
       }).toList();
     });
@@ -94,8 +95,9 @@ class _SalePageState extends State<SalePage> {
     }
 
     setState(() {
-      int existingIndex = cartItems
-          .indexWhere((item) => item['ProductID'] == product['ProductID']);
+      int existingIndex = cartItems.indexWhere(
+        (item) => item['ProductID'] == product['ProductID'],
+      );
 
       if (existingIndex >= 0) {
         if (cartItems[existingIndex]['quantity'] < product['Quantity']) {
@@ -168,18 +170,21 @@ class _SalePageState extends State<SalePage> {
   // --- UI ---
   void _showFeedback(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: isError ? Colors.red : Colors.green,
-      duration: Duration(seconds: 1),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        duration: Duration(seconds: 1),
+      ),
+    );
   }
 
   // *** ຟັງຊັນແກ້ໄຂຈຳນວນ ***
   void _showEditQuantityDialog(int index, {StateSetter? updater}) {
     final item = cartItems[index];
-    final quantityController =
-        TextEditingController(text: item['quantity'].toString());
+    final quantityController = TextEditingController(
+      text: item['quantity'].toString(),
+    );
 
     showDialog(
       context: context,
@@ -398,7 +403,8 @@ class _SalePageState extends State<SalePage> {
             Expanded(
               child: Container(
                 color: Colors.grey.shade100,
-                child: (product['ProductImageURL'] != null &&
+                child:
+                    (product['ProductImageURL'] != null &&
                         product['ProductImageURL'].isNotEmpty)
                     ? Image.network(
                         product['ProductImageURL'],
@@ -406,8 +412,11 @@ class _SalePageState extends State<SalePage> {
                         errorBuilder: (ctx, err, st) =>
                             Icon(Icons.image, color: Colors.grey.shade400),
                       )
-                    : Icon(Icons.inventory_2,
-                        size: 50, color: Colors.grey.shade400),
+                    : Icon(
+                        Icons.inventory_2,
+                        size: 50,
+                        color: Colors.grey.shade400,
+                      ),
               ),
             ),
             Padding(
@@ -428,8 +437,9 @@ class _SalePageState extends State<SalePage> {
                       Text(
                         '${product['SellPrice']} LAK',
                         style: TextStyle(
-                            color: Color(0xFFE45C58),
-                            fontWeight: FontWeight.bold),
+                          color: Color(0xFFE45C58),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         'Stock: ${product['Quantity']}',
@@ -456,13 +466,15 @@ class _SalePageState extends State<SalePage> {
             ? BorderRadius.vertical(top: Radius.circular(20))
             : null,
         boxShadow: [
-          BoxShadow(blurRadius: 5, color: Colors.black.withOpacity(0.1))
+          BoxShadow(blurRadius: 5, color: Colors.black.withOpacity(0.1)),
         ],
       ),
       child: Column(
         children: [
-          Text("ລາຍການຂາຍ ",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            "ລາຍການຂາຍ ",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           Divider(),
           Expanded(
             child: cartItems.isEmpty
@@ -483,25 +495,36 @@ class _SalePageState extends State<SalePage> {
                                   decrementItem(index, updater: updater),
                             ),
                             GestureDetector(
-                              onTap: () => _showEditQuantityDialog(index,
-                                  updater: updater),
+                              onTap: () => _showEditQuantityDialog(
+                                index,
+                                updater: updater,
+                              ),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 4),
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Text(item['quantity'].toString(),
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
+                                child: Text(
+                                  item['quantity'].toString(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.add_circle_outline,
-                                  size: 22, color: Color(0xFFE45C58)),
+                              icon: Icon(
+                                Icons.add_circle_outline,
+                                size: 22,
+                                color: Color(0xFFE45C58),
+                              ),
                               onPressed: () =>
                                   incrementItem(index, updater: updater),
                             ),
@@ -515,13 +538,18 @@ class _SalePageState extends State<SalePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("ຍອດລວມ:",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text('$totalAmount LAK',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Color(0xFFE45C58))),
+              Text(
+                "ຍອດລວມ:",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Text(
+                '$totalAmount LAK',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Color(0xFFE45C58),
+                ),
+              ),
             ],
           ),
           SizedBox(height: 16),
@@ -536,7 +564,7 @@ class _SalePageState extends State<SalePage> {
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

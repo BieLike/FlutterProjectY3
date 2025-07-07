@@ -4,7 +4,7 @@ const mysql = require('mysql')
 class Database{
     constructor(){
         this.db = mysql.createConnection({
-            host: "localhost",//192.168.222.224  /pe 192.168.189.1
+            host: "192.168.100.5",//192.168.222.224  /pe 192.168.189.1/192.168.100.9
             user: 'be',//Team  /pe  be
             password: '123',//123456  /pe 123
             database: 'dbcpr',

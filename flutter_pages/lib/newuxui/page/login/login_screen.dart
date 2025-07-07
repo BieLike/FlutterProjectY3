@@ -1,10 +1,14 @@
 import 'dart:convert';
-import 'package:animate_do/animate_do.dart'; //animate_do: ^4.2.0
+// import 'package:animate_do/animate_do.dart'; //animate_do: ^4.2.0
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_lect2/newuxui/DBpath.dart';
-import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
-import 'package:flutter_lect2/newuxui/widget/Custom_Button.dart';
+import 'package:flutter_application_1/newuxui/DBpath.dart';
+import 'package:flutter_application_1/newuxui/page/salepage/Salepage.dart';
+import 'package:flutter_application_1/newuxui/widget/Custom_Button.dart';
+// import 'package:flutter_lect2/newuxui/DBpath.dart';
+// import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
+// import 'package:flutter_lect2/newuxui/widget/Custom_Button.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart'; //ລົງໃນ pubspec shared_preferences: ^2.5.3
 

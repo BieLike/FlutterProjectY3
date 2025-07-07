@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/newuxui/page/login/login_screen.dart';
 
 // แก้ import ให้ถูก path
-import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
+// import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);

@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_lect2/newuxui/page/Import_page.dart';
-import 'package:flutter_lect2/newuxui/page/ManageCategoriesPage.dart';
-import 'package:flutter_lect2/newuxui/page/ManageProductsPage.dart';
-import 'package:flutter_lect2/newuxui/page/ManageRole.dart';
-import 'package:flutter_lect2/newuxui/page/ManageSupplier_page.dart';
-import 'package:flutter_lect2/newuxui/page/ManageUnitPage.dart';
-import 'package:flutter_lect2/newuxui/page/ManageUser.dart';
-import 'package:flutter_lect2/newuxui/page/SettingsPage.dart';
-import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
-import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
-import 'package:flutter_lect2/newuxui/page/shortImp.dart';
+import 'package:flutter_application_1/newuxui/page/ManageCategoriesPage.dart';
+import 'package:flutter_application_1/newuxui/page/ManageProductsPage.dart';
+import 'package:flutter_application_1/newuxui/page/ManageRole.dart';
+import 'package:flutter_application_1/newuxui/page/ManageSupplier_page.dart';
+import 'package:flutter_application_1/newuxui/page/ManageUnitPage.dart';
+import 'package:flutter_application_1/newuxui/page/ManageUser.dart';
+import 'package:flutter_application_1/newuxui/page/Sell_History/Sell_HistoryPage.dart';
+import 'package:flutter_application_1/newuxui/page/SettingsPage.dart';
+import 'package:flutter_application_1/newuxui/page/author/ManageAuthor.dart';
+import 'package:flutter_application_1/newuxui/page/login/login_screen.dart';
+import 'package:flutter_application_1/newuxui/page/salepage/Salepage.dart';
+import 'package:flutter_application_1/newuxui/page/shortImp.dart';
+// import 'package:flutter_lect2/newuxui/page/Import_page.dart';
+// import 'package:flutter_lect2/newuxui/page/ManageCategoriesPage.dart';
+// import 'package:flutter_lect2/newuxui/page/ManageProductsPage.dart';
+// import 'package:flutter_lect2/newuxui/page/ManageRole.dart';
+// import 'package:flutter_lect2/newuxui/page/ManageSupplier_page.dart';
+// import 'package:flutter_lect2/newuxui/page/ManageUnitPage.dart';
+// import 'package:flutter_lect2/newuxui/page/ManageUser.dart';
+// import 'package:flutter_lect2/newuxui/page/SettingsPage.dart';
+// import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
+// import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
+// import 'package:flutter_lect2/newuxui/page/shortImp.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -86,6 +98,24 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context);
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ManageUnitPage()));
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.table_view),
+            title: Text('ຈັດການຂໍ້ມູນຜູ້ແຕ່ງ'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ManageAuthorPage()));
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.table_view),
+            title: Text('ປະຫວັດການຂາຍ'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SalesHistoryPage()));
             },
           ),
           ListTile(

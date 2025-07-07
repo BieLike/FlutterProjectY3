@@ -1,0 +1,177 @@
+
+const express = require('express');
+const core = require('cors');
+const Database = require('../Server');
+
+const app = express();
+app.use(express.json());
+app.use(core());
+
+const connection = new Database();
+const db = connection.getConnection();
+
+// --- API Endpoints ---
+
+// 1. Get All Sales History
+app.get('/sales', (req, res) => {
+    try {
+        const sql = 'SELECT * FROM tbsell';
+        db.query(sql, (err, result) => {
+            if (err) {
+                console.error('Error fetching sales history:', err);
+                return res.status(500).json({ msg: 'Failed to retrieve sales history.', error: err.message });
+            }
+            return res.status(200).json(result);
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ msg: 'Path to database not found' });
+    }
+});
+
+// 2. Get Specific Sale Details
+app.get('/sales/:sellId', (req, res) => {
+    try {
+        const { sellId } = req.params;
+        const sqlSale = 'SELECT * FROM tbsell WHERE SellID = ?';
+        db.query(sqlSale, [sellId], (err, sale) => {
+            if (err) {
+                console.error(`Error fetching sale details for SellID ${sellId}:`, err);
+                return res.status(500).json({ msg: 'Failed to retrieve sale details.', error: err.message });
+            }
+            if (sale.length === 0) {
+                return res.status(404).json({ msg: `Sale with ID ${sellId} not found.` });
+            }
+            const sqlDetails = `SELECT sd.SellDetailID, sd.ProductID, p.ProductName, sd.Price, sd.Quantity, sd.Total FROM tbselldetail sd JOIN tbproduct p ON sd.ProductID = p.ProductID WHERE sd.SellID = ?`;
+            db.query(sqlDetails, [sellId], (err2, details) => {
+                if (err2) {
+                    console.error(`Error fetching sale details for SellID ${sellId}:`, err2);
+                    return res.status(500).json({ msg: 'Failed to retrieve sale details.', error: err2.message });
+                }
+                const responseData = {
+                    ...sale[0],
+                    details: details
+                };
+                return res.status(200).json(responseData);
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ msg: 'Path to database not found' });
+    }
+});
+
+// 3. Update Product in Sale Detail
+app.put('/sales/detail/:sellDetailId', (req, res) => {
+    try {
+        const { sellDetailId } = req.params;
+        const { newQuantity, newPrice } = req.body;
+        const sqlDetail = `SELECT sd.ProductID, sd.Quantity, sd.Price, p.Quantity AS ProductStock FROM tbselldetail sd JOIN tbproduct p ON sd.ProductID = p.ProductID WHERE sd.SellDetailID = ?`;
+        db.query(sqlDetail, [sellDetailId], (err, currentDetail) => {
+            if (err) {
+                console.error(`Error updating sale detail ${sellDetailId}:`, err);
+                return res.status(500).json({ msg: 'Failed to update sale detail.', error: err.message });
+            }
+            if (currentDetail.length === 0) {
+                return res.status(404).json({ msg: `Sale detail with ID ${sellDetailId} not found.` });
+            }
+            const oldQuantity = currentDetail[0].Quantity;
+            const oldPrice = parseFloat(currentDetail[0].Price);
+            const productID = currentDetail[0].ProductID;
+            const currentStock = currentDetail[0].ProductStock;
+            const finalQuantity = newQuantity !== undefined ? parseInt(newQuantity) : oldQuantity;
+            const finalPrice = newPrice !== undefined ? parseFloat(newPrice) : oldPrice;
+            if (isNaN(finalQuantity) || finalQuantity <= 0) {
+                return res.status(400).json({ msg: 'Invalid input. newQuantity must be a positive number.' });
+            }
+            const quantityDifference = finalQuantity - oldQuantity;
+            if (quantityDifference > 0 && currentStock < quantityDifference) {
+                return res.status(409).json({ msg: `Insufficient stock for product ${productID}. Available: ${currentStock}, Needed: ${quantityDifference}.` });
+            }
+            const newTotal = finalPrice * finalQuantity;
+            const sqlUpdateDetail = 'UPDATE tbselldetail SET Quantity = ?, Price = ?, Total = ? WHERE SellDetailID = ?';
+            db.query(sqlUpdateDetail, [finalQuantity, finalPrice, newTotal, sellDetailId], (err2) => {
+                if (err2) {
+                    console.error(`Error updating sale detail ${sellDetailId}:`, err2);
+                    return res.status(500).json({ msg: 'Failed to update sale detail.', error: err2.message });
+                }
+                const sqlUpdateStock = 'UPDATE tbproduct SET Quantity = Quantity - ? WHERE ProductID = ?';
+                db.query(sqlUpdateStock, [quantityDifference, productID], (err3) => {
+                    if (err3) {
+                        console.error(`Error updating sale detail ${sellDetailId}:`, err3);
+                        return res.status(500).json({ msg: 'Failed to update sale detail.', error: err3.message });
+                    }
+                    const sqlParentSell = 'SELECT SellID FROM tbselldetail WHERE SellDetailID = ?';
+                    db.query(sqlParentSell, [sellDetailId], (err4, parentSell) => {
+                        if (err4 || parentSell.length === 0) {
+                            return res.status(500).json({ msg: 'Failed to update parent sale.' });
+                        }
+                        const sellID = parentSell[0].SellID;
+                        const sqlRecalc = 'SELECT SUM(Total) AS newSubTotal FROM tbselldetail WHERE SellID = ?';
+                        db.query(sqlRecalc, [sellID], (err5, recalculatedTotals) => {
+                            const newSubTotal = recalculatedTotals && recalculatedTotals[0] && recalculatedTotals[0].newSubTotal ? recalculatedTotals[0].newSubTotal : 0;
+                            const sqlUpdateSell = 'UPDATE tbsell SET SubTotal = ?, GrandTotal = ? WHERE SellID = ?';
+                            db.query(sqlUpdateSell, [newSubTotal, newSubTotal, sellID], (err6) => {
+                                if (err6) {
+                                    return res.status(500).json({ msg: 'Failed to update parent sale.' });
+                                }
+                                return res.status(200).json({ msg: 'Sale detail updated successfully. Stock adjusted.' });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ msg: 'Path to database not found' });
+    }
+});
+
+// 4. Delete Product from Sale Detail
+app.delete('/sales/detail/:sellDetailId', (req, res) => {
+    try {
+        const { sellDetailId } = req.params;
+        const sqlDetail = `SELECT sd.SellID, sd.ProductID, sd.Quantity, sd.Total FROM tbselldetail sd WHERE sd.SellDetailID = ?`;
+        db.query(sqlDetail, [sellDetailId], (err, detailToDelete) => {
+            if (err) {
+                console.error(`Error deleting sale detail ${sellDetailId}:`, err);
+                return res.status(500).json({ msg: 'Failed to delete product from sale detail.', error: err.message });
+            }
+            if (detailToDelete.length === 0) {
+                return res.status(404).json({ msg: `Sale detail with ID ${sellDetailId} not found.` });
+            }
+            const { SellID, ProductID, Quantity: deletedQuantity } = detailToDelete[0];
+            const sqlDelete = 'DELETE FROM tbselldetail WHERE SellDetailID = ?';
+            db.query(sqlDelete, [sellDetailId], (err2) => {
+                if (err2) {
+                    return res.status(500).json({ msg: 'Failed to delete product from sale detail.', error: err2.message });
+                }
+                const sqlRevertStock = 'UPDATE tbproduct SET Quantity = Quantity + ? WHERE ProductID = ?';
+                db.query(sqlRevertStock, [deletedQuantity, ProductID], (err3) => {
+                    if (err3) {
+                        return res.status(500).json({ msg: 'Failed to revert stock.', error: err3.message });
+                    }
+                    const sqlRecalc = 'SELECT SUM(Total) AS newSubTotal FROM tbselldetail WHERE SellID = ?';
+                    db.query(sqlRecalc, [SellID], (err4, remainingDetails) => {
+                        const newSubTotal = remainingDetails && remainingDetails[0] && remainingDetails[0].newSubTotal ? remainingDetails[0].newSubTotal : 0;
+                        const sqlUpdateSell = 'UPDATE tbsell SET SubTotal = ?, GrandTotal = ? WHERE SellID = ?';
+                        db.query(sqlUpdateSell, [newSubTotal, newSubTotal, SellID], (err5) => {
+                            if (err5) {
+                                return res.status(500).json({ msg: 'Failed to update parent sale.' });
+                            }
+                            return res.status(200).json({ msg: 'Product removed from sale and stock adjusted successfully.' });
+                        });
+                    });
+                });
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ msg: 'Path to database not found' });
+    }
+});
+
+
+
+module.exports = app;

@@ -1,6 +1,5 @@
 const express = require('express')
 const core = require('cors')
-
 const Product = require('./Management/Product')
 const Book = require('./Management/Book')
 const Unit = require('./Management/Unit')
@@ -9,11 +8,14 @@ const User = require('./Management/User')
 const Import = require('./Management/Import')
 const Supplier = require('./Management/Supplier')
 const Role = require('./Management/Role')
-
+const Author = require('./Management/Authors')
+const Sellhy = require('./Management/Sales_History')
 const app = express()
 app.use(express.json())
 app.use(core())
 
+app.use('/main', Sellhy)
+app.use('/main', Author)
 app.use('/main', Product)
 app.use('/main', Book)
 app.use('/main', Unit)
