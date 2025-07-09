@@ -1,70 +1,11 @@
 // main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart'; // Make sure to add intl to your pubspec.yaml
-import 'package:flutter_application_1/newuxui/widget/app_drawer.dart';
+import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Sales History App',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//         visualDensity: VisualDensity.adaptivePlatformDensity,
-//         fontFamily:
-//             'Inter', // Ensure this font is properly configured in pubspec.yaml
-//         appBarTheme: const AppBarTheme(
-//           backgroundColor: Color(0xFF1E88E5), // Deeper blue for app bars
-//           foregroundColor: Colors.white,
-//           centerTitle: true,
-//           elevation: 0, // Flat app bar for a modern look
-//         ),
-//         // cardTheme: CardTheme(
-//         //   elevation: 4,
-//         //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-//         //   margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-//         // ),
-//         snackBarTheme: const SnackBarThemeData(
-//           behavior: SnackBarBehavior.floating,
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.all(Radius.circular(8)),
-//           ),
-//           contentTextStyle: TextStyle(color: Colors.white),
-//         ),
-//         elevatedButtonTheme: ElevatedButtonThemeData(
-//           style: ElevatedButton.styleFrom(
-//             backgroundColor: Color(0xFF2196F3), // Primary blue for buttons
-//             foregroundColor: Colors.white,
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(8),
-//             ),
-//             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-//             textStyle: const TextStyle(
-//               fontSize: 16,
-//               fontWeight: FontWeight.w500,
-//             ),
-//           ),
-//         ),
-//         textButtonTheme: TextButtonThemeData(
-//           style: TextButton.styleFrom(
-//             foregroundColor: Color(0xFF2196F3), // Primary blue for text buttons
-//           ),
-//         ),
-//       ),
-//       home: const SalesHistoryPage(),
-//     );
-//   }
-// }
-
-// models/sale.dart
 class Sale {
   final int sellId;
   final DateTime date;
@@ -178,9 +119,8 @@ class FullSaleDetails extends Sale {
 
   factory FullSaleDetails.fromJson(Map<String, dynamic> json) {
     var detailsList = json['details'] as List;
-    List<SaleDetail> parsedDetails = detailsList
-        .map((i) => SaleDetail.fromJson(i))
-        .toList();
+    List<SaleDetail> parsedDetails =
+        detailsList.map((i) => SaleDetail.fromJson(i)).toList();
 
     return FullSaleDetails(
       sellId: int.parse(json['SellID'].toString()),
@@ -207,7 +147,7 @@ class ApiService {
   // IMPORTANT: Replace with your actual API server URL
   // If running locally, use your machine's IP address (e.g., 'http://192.168.1.X:3000')
   // or 'http://localhost:3000' if running on a simulator/emulator with port forwarding.
-  final String baseUrl = 'http://172.16.178.107:3000/main';
+  final String baseUrl = '${basePath().bpath()}/main';
 
   Future<List<Sale>> getSalesHistory() async {
     final response = await http.get(Uri.parse('$baseUrl/sales'));
@@ -357,7 +297,9 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                           children: [
                             Text(
                               'Sale ID: #${sale.sellId}',
-                              style: Theme.of(context).textTheme.titleLarge
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
                                   ?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.blueAccent,
@@ -414,7 +356,9 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'Sold by: ${sale.employeeName ?? 'N/A'}',
-                                  style: Theme.of(context).textTheme.bodyMedium
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
                                       ?.copyWith(color: Colors.grey[700]),
                                 ),
                               ],
@@ -736,7 +680,9 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                         children: [
                           Text(
                             'Sale Overview',
-                            style: Theme.of(context).textTheme.headlineSmall
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blueGrey[800],
@@ -791,7 +737,9 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                         children: [
                           Text(
                             'Employee Information',
-                            style: Theme.of(context).textTheme.headlineSmall
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blueGrey[800],
@@ -827,9 +775,9 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                   Text(
                     'Products in this Sale',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                   ),
                   const SizedBox(height: 10),
                   if (sale.details.isEmpty)
@@ -859,7 +807,9 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                               children: [
                                 Text(
                                   detail.productName,
-                                  style: Theme.of(context).textTheme.titleMedium
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.deepPurple[700],

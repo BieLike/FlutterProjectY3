@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/page/Import/Import_page.dart';
+import 'package:flutter_lect2/newuxui/page/Sell_History/new_sellHistory.dart';
 import 'package:flutter_lect2/newuxui/page/UnC/ManageCategoriesPage.dart';
 import 'package:flutter_lect2/newuxui/page/Product/ManageProductsPage.dart';
 import 'package:flutter_lect2/newuxui/page/UsrNRole/ManageRole.dart';
 import 'package:flutter_lect2/newuxui/page/UsrNRole/ManageSupplier_page.dart';
 import 'package:flutter_lect2/newuxui/page/UnC/ManageUnitPage.dart';
 import 'package:flutter_lect2/newuxui/page/UsrNRole/ManageUser.dart';
-import 'package:flutter_lect2/newuxui/page/Sell_History/Sell_HistoryPage.dart';
 import 'package:flutter_lect2/newuxui/page/SettingsPage.dart';
 import 'package:flutter_lect2/newuxui/page/author/ManageAuthor.dart';
 import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';

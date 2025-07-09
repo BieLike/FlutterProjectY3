@@ -817,7 +817,7 @@ class _ManageImportPageState extends State<ManageImportPage> {
                   onPressed: SelectDateRange,
                   icon: Icon(Icons.date_range),
                   label: Text(selectedDateRange == 'Custom Range'
-                      ? '${DateFormat('MMM dd').format(startDate!)} - ${DateFormat('MMM dd').format(endDate!)}'
+                      ? '${DateFormat('dd MMM').format(startDate!)} - ${DateFormat('dd MMM').format(endDate!)}'
                       : selectedDateRange),
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.white,
