@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/newuxui/DBpath.dart';
-import 'package:flutter_application_1/newuxui/page/salepage/Billpage.dart';
-// import 'package:flutter_lect2/newuxui/DBpath.dart';
-// import 'package:flutter_lect2/newuxui/page/salepage/Billpage.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
+import 'package:flutter_lect2/newuxui/page/salepage/Billpage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 

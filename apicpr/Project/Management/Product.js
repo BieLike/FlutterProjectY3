@@ -59,9 +59,9 @@ app.get("/product/:pid", (req, res)=>{
 
 app.post("/product", (req,res) =>{
     try{
-        const sql = "insert into tbproduct value(?,?,?,?,?,?,?,?,?)"
-        const {ProductID, ProductName, Quantity, ImportPrice, SellPrice, UnitID, CategoryID, Balance, Level} = req.body
-        const val = [ProductID, ProductName, Quantity, ImportPrice, SellPrice, UnitID, CategoryID, Balance, Level]
+        const sql = "insert into tbproduct value(?,?,?,?,?,?,?,?,?,?)"
+        const {ProductID, ProductName, Quantity, ImportPrice, SellPrice, UnitID, CategoryID, Authors, Balance, Level} = req.body
+        const val = [ProductID, ProductName, Quantity, ImportPrice, SellPrice, UnitID, CategoryID, Authors, Balance, Level]
         const chsql = "select * from tbproduct where ProductID = ? or ProductName like ? "
 const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname()};//ດຶງຂໍ້ມູນເຄື່ອງ
         db.query(chsql,[ProductID, ProductName],(err, chresult)=>{
@@ -108,11 +108,11 @@ app.put("/product/:pid", (req, res) => {
         let {
             NewProductID, ProductName, NewProductName,
             Quantity, ImportPrice, SellPrice,
-            UnitID, CategoryID, Balance, Level
+            UnitID, CategoryID, Authors, Balance, Level
         } = req.body;
 
         const chsql = "SELECT * FROM tbproduct WHERE ProductID = ? OR ProductName = ?";
-        const sql = "UPDATE tbproduct SET ProductID = ?, ProductName = ?, Quantity = ?, ImportPrice = ?, SellPrice = ?, UnitID = ?, CategoryID = ?, Balance = ?, Level = ? WHERE ProductID = ?";
+        const sql = "UPDATE tbproduct SET ProductID = ?, ProductName = ?, Quantity = ?, ImportPrice = ?, SellPrice = ?, UnitID = ?, CategoryID = ?, authorsID = ?, Balance = ?, Level = ? WHERE ProductID = ?";
 
         const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() };
 
@@ -133,7 +133,7 @@ app.put("/product/:pid", (req, res) => {
             if (!NewProductID) NewProductID = pid;
             if (!NewProductName) NewProductName = ProductName;
 
-            const val = [NewProductID, NewProductName, Quantity, ImportPrice, SellPrice, UnitID, CategoryID, Balance, Level, pid];
+            const val = [NewProductID, NewProductName, Quantity, ImportPrice, SellPrice, UnitID, CategoryID, Authors, Balance, Level, pid];
 
             db.query(sql, val, (err, result) => {
                 if (err) {
@@ -211,47 +211,6 @@ app.post("/product/sell", async (req, res) => {
     }
 });
 
-app.put("/product/import/:pid", (req,res)=>{
-    try{
-        const pid = req.params.pid
-        const {ImportQty} = req.body
-        const chsql = "select * from tbproduct where ProductID = ?"
-        const sql = "update tbproduct set Quantity = Quantity + ?, Balance = Balance + ? where ProductID = ?"
-        const val = [ImportQty, ImportQty, pid]
-        const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname()};//ດຶງຂໍ້ມູນເຄື່ອງ
-        db.query(chsql,[pid],(err, chresult)=>{
-            if(err){
-                console.log(err)
-                return res.status(400).send({
-                    "msg":"Import checking error", "clientInfo": clientInfo//ເພີ່ມຂໍ້ມູນເຄື່ອງໃນການແຈ້ງກັບ
-                    })
-            }
-            if (chresult.length > 0){
-                db.query(sql,val, (err,result) =>{
-                    if(err){
-                        console.log(err)
-                        return res.status(301).send({
-                            "msg":"Please check again", "clientInfo": clientInfo//ເພີ່ມຂໍ້ມູນເຄື່ອງໃນການແຈ້ງກັບ
-                            })
-                    }
-                        return res.status(200).send({
-                        "msg":"Import successful", "clientInfo": clientInfo//ເພີ່ມຂໍ້ມູນເຄື່ອງໃນການແຈ້ງກັບ
-                        })
-                    }
-                )}
-            else{  
-                return res.status(305).send({
-                    "msg":"Product not found", "clientInfo": clientInfo//ເພີ່ມຂໍ້ມູນເຄື່ອງໃນການແຈ້ງກັບ
-                    })
-             }
-        })
-    }catch(err){
-        console.log(err)
-        return res.status(500).send({
-            "msg":"Path to database not found"
-            })
-    }
-})
 
 app.delete("/product/:pid",(req,res) =>{
     try{
@@ -286,113 +245,6 @@ app.delete("/product/:pid",(req,res) =>{
     }
 })
 
-
-
-// Enhanced Import API Endpoint for Product.js
-// Add this to replace or enhance your existing import endpoint
-
-app.put("/product/import/:pid", (req, res) => {
-    try {
-        const pid = req.params.pid;
-        const { ImportQty, ImportPrice } = req.body;
-        
-        // Input validation
-        if (!ImportQty || ImportQty <= 0) {
-            return res.status(400).send({
-                "msg": "Import quantity must be greater than 0",
-                "clientInfo": req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() }
-            });
-        }
-        
-        if (!ImportPrice || ImportPrice < 0) {
-            return res.status(400).send({
-                "msg": "Import price cannot be negative",
-                "clientInfo": req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() }
-            });
-        }
-        
-        // Convert to numbers to ensure proper validation
-        const importQty = parseInt(ImportQty);
-        const importPrice = parseFloat(ImportPrice);
-        
-        if (isNaN(importQty) || isNaN(importPrice)) {
-            return res.status(400).send({
-                "msg": "Invalid number format for quantity or price",
-                "clientInfo": req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() }
-            });
-        }
-        
-        const chsql = "SELECT * FROM tbproduct WHERE ProductID = ?";
-        const updateSql = `
-            UPDATE tbproduct 
-            SET Quantity = Quantity + ?, 
-                Balance = Balance + ?,
-                ImportPrice = ? 
-            WHERE ProductID = ?
-        `;
-        const val = [importQty, importQty, importPrice, pid];
-        const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() };
-        
-        // Check if product exists
-        db.query(chsql, [pid], (err, chresult) => {
-            if (err) {
-                console.log("Import checking error:", err);
-                return res.status(400).send({
-                    "msg": "Import checking error", 
-                    "clientInfo": clientInfo
-                });
-            }
-            
-            if (chresult.length === 0) {
-                return res.status(404).send({
-                    "msg": "Product not found", 
-                    "clientInfo": clientInfo
-                });
-            }
-            
-            const currentProduct = chresult[0];
-            
-            // Perform the import update
-            db.query(updateSql, val, (err, result) => {
-                if (err) {
-                    console.log("Import update error:", err);
-                    return res.status(500).send({
-                        "msg": "Failed to update product inventory", 
-                        "clientInfo": clientInfo
-                    });
-                }
-                
-                // Calculate new totals for response
-                const newQuantity = currentProduct.Quantity + importQty;
-                const newBalance = currentProduct.Balance + importQty;
-                const totalCost = importQty * importPrice;
-                
-                return res.status(200).send({
-                    "msg": "Import successful",
-                    "clientInfo": clientInfo,
-                    "importDetails": {
-                        "productId": pid,
-                        "productName": currentProduct.ProductName,
-                        "importedQuantity": importQty,
-                        "importPrice": importPrice,
-                        "totalCost": totalCost,
-                        "previousQuantity": currentProduct.Quantity,
-                        "newQuantity": newQuantity,
-                        "previousBalance": currentProduct.Balance,
-                        "newBalance": newBalance
-                    }
-                });
-            });
-        });
-        
-    } catch (err) {
-        console.log("Import endpoint error:", err);
-        return res.status(500).send({
-            "msg": "Server error during import process",
-            "clientInfo": req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() }
-        });
-    }
-});
 
 
 

@@ -52,6 +52,19 @@ app.put("/import/:id/update-status", async (req, res) => {
         const importID = req.params.id;
         const { status, checkedItems, reason } = req.body;
         const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname() };
+        const checkQuery = 'SELECT Status FROM tbimport WHERE ImportID = ?';
+        const existingImport = await queryAsync(checkQuery, [importID]);
+        
+        if (existingImport.length === 0) {
+            return res.status(404).json({ msg: 'Import not found' });
+        }
+        
+        if (existingImport[0].Status === 'Completed') {
+            return res.status(400).json({ 
+                msg: 'Import is already completed and cannot be confirmed again',
+                alreadyCompleted: true 
+            });
+        }
         
         // Validate required fields
         if (!status) {
@@ -175,7 +188,13 @@ app.put("/import/:id/update-status", async (req, res) => {
         
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ msg: "Database connection error" });
+        // Make sure to rollback if transaction was started
+        try {
+            await queryAsync("ROLLBACK");
+        } catch (rollbackErr) {
+            console.error("Rollback failed:", rollbackErr);
+        }
+        return res.status(500).json({ msg: "Database transaction failed: " + err.message });
     }
 });
 

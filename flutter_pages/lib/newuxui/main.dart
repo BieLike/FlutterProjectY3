@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/newuxui/page/login/login_screen.dart';
-
-// import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
+import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
 void main() {
   runApp(MainPage());
 }

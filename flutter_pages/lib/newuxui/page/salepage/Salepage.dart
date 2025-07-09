@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/newuxui/DBpath.dart';
-import 'package:flutter_application_1/newuxui/page/salepage/Payment_page.dart';
-import 'package:flutter_application_1/newuxui/widget/app_drawer.dart';
-// import 'package:flutter_lect2/newuxui/DBpath.dart';
-// import 'package:flutter_lect2/newuxui/page/salepage/Payment_page.dart';
-// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
+import 'package:flutter_lect2/newuxui/page/salepage/Payment_page.dart';
+import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
 class SalePage extends StatefulWidget {

@@ -1,8 +1,7 @@
 // Billpage.dart (Refactored)
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/newuxui/page/salepage/Salepage.dart';
-// import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
+import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
 
 class BillPage extends StatelessWidget {
   final Map<String, dynamic> transactionData;

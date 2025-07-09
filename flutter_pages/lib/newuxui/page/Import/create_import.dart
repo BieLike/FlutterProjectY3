@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/newuxui/DBpath.dart';
-// import 'package:flutter_lect2/newuxui/DBpath.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
+import 'package:flutter_lect2/newuxui/page/Import/Import_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -377,6 +377,8 @@ class _CreateImportPageState extends State<CreateImportPage> {
 
         // Navigate back to import list
         Navigator.pop(context);
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => ManageImportPage()));
       } else {
         final errorData = json.decode(response.body);
         _showErrorMessage(errorData['msg'] ?? 'Failed to create import');
@@ -779,7 +781,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                         return ListTile(
                           dense: true,
                           title: Text(
-                            supplier['ຊື່ຜູ້ສະໜອງ'] ?? 'N/A',
+                            supplier['SupplierName'] ?? 'N/A',
                             style: TextStyle(fontSize: 14),
                           ),
                           subtitle: Text(

@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/newuxui/DBpath.dart';
-import 'package:flutter_application_1/newuxui/widget/app_drawer.dart';
-// import 'package:flutter_lect2/newuxui/DBpath.dart';
-// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+import 'package:flutter_lect2/newuxui/DBpath.dart';
+import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
 class ManageCategoriesPage extends StatefulWidget {
@@ -229,6 +227,10 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
     }
 
     Future<void> UpdateCategory(String PID) async {
+      if (txtNewID.text.trim().isEmpty && txtNewName.text.trim().isEmpty) {
+        ShowErrorMessage("Please enter at least one new value to update!");
+        return;
+      }
       if (txtID.text.isEmpty || txtName.text.isEmpty) {
         ShowErrorMessage("All field are required!");
         return;
