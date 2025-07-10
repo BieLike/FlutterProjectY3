@@ -45,6 +45,17 @@ app.get("/supplier", async (req, res) => {
     }
 });
 
+app.get("/supplier/active", async (req, res) => {
+    try {
+        const sql = "SELECT * FROM tbsupplier where status like 'Active' ORDER BY SupplierName";
+        const result = await queryAsync(sql);
+        return res.status(200).json(result);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ msg: "Database connection error" });
+    }
+});
+
 // Get supplier by ID
 app.get("/supplier/:id", async (req, res) => {
     try {

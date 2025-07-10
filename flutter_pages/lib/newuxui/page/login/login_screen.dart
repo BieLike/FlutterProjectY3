@@ -51,9 +51,18 @@ class _LoginScreenState extends State<LoginScreen> {
       // get all users from server
       final usersUrl = Uri.parse("$baseUrl/main/user");
       final usersResponse = await http.get(usersUrl);
+      final roleUrl = Uri.parse("$baseUrl/main/user/login");
+      final roleResponse = await http.post(
+        roleUrl,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"Phone": int.parse(phone), "UserPassword": password}),
+      );
 
-      if (usersResponse.statusCode == 200) {
+      if (usersResponse.statusCode == 200 && roleResponse.statusCode == 200) {
         final List<dynamic> users = jsonDecode(usersResponse.body);
+        final data = jsonDecode(roleResponse.body);
+        String role = data['RoleName'] ?? 'Unknown';
+        String name = data['UserFname'] ?? 'Unknown';
 
         // change pheone to int
         int phoneInt = int.parse(phone);
@@ -68,6 +77,8 @@ class _LoginScreenState extends State<LoginScreen> {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('user_data', json.encode(user));
             await prefs.setBool('is_logged_in', true);
+            await prefs.setString('role', role);
+            await prefs.setString('UserFname', name);
 
             setState(() {
               isLoading = false;

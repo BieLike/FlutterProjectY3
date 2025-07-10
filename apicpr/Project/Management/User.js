@@ -26,12 +26,11 @@ app.get("/user", function(req, res){
     }
 })
 
-app.get("/user/login", function(req, res){
+app.post("/user/login", function(req, res){
     try{
-        const sql = "select * from tbuser where Phone = ? and UserPassword = ?"
+        const sql = "select *, r.RoleName from tbuser u join tbrole r on u.position = r.RID where Phone = ? and UserPassword = ?"
         const {Phone, UserPassword} = req.body
         const val =  [Phone, UserPassword]
-        const clientInfo = req.clientInfo || { hostname: 'Unknown Computer', serverHostname: os.hostname()};//ດຶງຂໍ້ມູນເຄື່ອງ
         db.query(sql,val,(err, result, field)=>{
             if(err){
                 console.log(err) 
@@ -39,10 +38,15 @@ app.get("/user/login", function(req, res){
             }
             if(result != ""){
             console.log(field)
-            return res.status(200).send({"Pass": result,  "clientInfo": clientInfo})
+            return res.status(200).send({
+                "RoleName": result[0].RoleName,
+                "UserFname": result[0].UserFname, success:true})
             }
             else{
-                return res.status(200).send({"Not pass": result,  "clientInfo": clientInfo})
+                return res.status(401).send({
+                    "success": false,
+                    "msg": "Invalid credentials"
+                })
             }
         })
     }catch(err){

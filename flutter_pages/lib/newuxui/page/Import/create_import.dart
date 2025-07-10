@@ -95,7 +95,8 @@ class _CreateImportPageState extends State<CreateImportPage> {
     try {
       setState(() => _isLoadingSuppliers = true);
 
-      final response = await http.get(Uri.parse("$baseurl/main/supplier"));
+      final response =
+          await http.get(Uri.parse("$baseurl/main/supplier/active"));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -104,7 +105,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
           _isLoadingSuppliers = false;
         });
       } else {
-        throw Exception('Failed to load suppliers');
+        throw Exception('Not found');
       }
     } catch (e) {
       setState(() => _isLoadingSuppliers = false);

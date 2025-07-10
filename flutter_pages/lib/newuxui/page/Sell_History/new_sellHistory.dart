@@ -648,7 +648,7 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
           IconButton(
             icon: const Icon(Icons.delete_forever),
             tooltip: 'Delete Entire Sale',
-            color: Colors.cyan,
+            color: Colors.blue,
             onPressed: () => _deleteSale(widget.sellId),
           ),
         ],

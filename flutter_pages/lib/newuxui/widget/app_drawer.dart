@@ -12,9 +12,33 @@ import 'package:flutter_lect2/newuxui/page/author/ManageAuthor.dart';
 import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
 import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
 import 'package:flutter_lect2/newuxui/page/Import/shortImp.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
+  const AppDrawer({super.key});
+
   @override
+  State<AppDrawer> createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer> {
+  String userRole = '';
+  String userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserRole();
+  }
+
+  Future<void> loadUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userRole = prefs.getString('role') ?? '';
+      userName = prefs.getString('UserFname') ?? '';
+    });
+  }
+
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -34,19 +58,29 @@ class AppDrawer extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  'ຜູ້ຈັດການຮ້ານ',
+                  '${userName}',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                   ),
                 ),
-                Text(
-                  'admin@bookstore.com',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
+                if (userRole == 'Admin') ...{
+                  Text(
+                    'admin@bookstore.com',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
+                } else ...{
+                  Text(
+                    'user@bookstore.com',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                }
               ],
             ),
           ),
@@ -59,46 +93,51 @@ class AppDrawer extends StatelessWidget {
                   context, MaterialPageRoute(builder: (context) => SalePage()));
             },
           ),
-          ListTile(
-            leading: Icon(Icons.inventory),
-            title: Text('ຈັດການສິນຄ້າ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ManageProductsPage()),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.category),
-            title: Text('ຈັດການໝວດໝູ່'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ManageCategoriesPage()),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.table_view),
-            title: Text('ຈັດການຂໍ້ມູນຫົວໜ່ວຍ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ManageUnitPage()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.table_view),
-            title: Text('ຈັດການຂໍ້ມູນຜູ້ແຕ່ງ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ManageAuthorPage()));
-            },
-          ),
+          if (userRole == 'Admin') ...[
+            ListTile(
+              leading: Icon(Icons.inventory),
+              title: Text('ຈັດການສິນຄ້າ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManageProductsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.category),
+              title: Text('ຈັດການໝວດໝູ່'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ManageCategoriesPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.table_view),
+              title: Text('ຈັດການຂໍ້ມູນຫົວໜ່ວຍ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ManageUnitPage()));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.table_view),
+              title: Text('ຈັດການຂໍ້ມູນຜູ້ແຕ່ງ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ManageAuthorPage()));
+              },
+            ),
+          ],
           ListTile(
             leading: Icon(Icons.table_view),
             title: Text('ປະຫວັດການຂາຍ'),
@@ -117,28 +156,30 @@ class AppDrawer extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => ManageImportPage()));
             },
           ),
-          ListTile(
-            leading: Icon(Icons.star),
-            title: Text('ຈັດການຕຳແໜ່ງ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => RolePage()),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.emoji_people),
-            title: Text('ຈັດການຜູ້ໃຊ້'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ManageUserPage()),
-              );
-            },
-          ),
+          if (userRole == 'Admin') ...[
+            ListTile(
+              leading: Icon(Icons.star),
+              title: Text('ຈັດການຕຳແໜ່ງ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RolePage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.emoji_people),
+              title: Text('ຈັດການຜູ້ໃຊ້'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManageUserPage()),
+                );
+              },
+            ),
+          ],
           ListTile(
             leading: Icon(Icons.emoji_transportation_rounded),
             title: Text('ຈັດການຜູ້ສະໜອງ'),
