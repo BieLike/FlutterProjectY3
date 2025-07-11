@@ -658,7 +658,6 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 // Date picker
                 Expanded(
                   child: InkWell(
-                    onTap: _selectDate,
                     child: Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -684,7 +683,6 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 // Time picker
                 Expanded(
                   child: InkWell(
-                    onTap: _selectTime,
                     child: Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 16),

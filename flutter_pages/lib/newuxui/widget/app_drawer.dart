@@ -72,6 +72,22 @@ class _AppDrawerState extends State<AppDrawer> {
                       fontSize: 14,
                     ),
                   ),
+                } else if (userRole == 'Cashier') ...{
+                  Text(
+                    'Cashier@bookstore.com',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                } else if (userRole == 'Stocker') ...{
+                  Text(
+                    'Stocker@bookstore.com',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
                 } else ...{
                   Text(
                     'user@bookstore.com',
@@ -84,15 +100,34 @@ class _AppDrawerState extends State<AppDrawer> {
               ],
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text('ຂາຍສິນຄ້າ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => SalePage()));
-            },
-          ),
+          if (userRole == 'Cashier' || userRole == 'Admin') ...[
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('ຂາຍສິນຄ້າ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SalePage()));
+              },
+            ),
+          ],
+          if (userRole == 'Cashier' || userRole == 'Admin') ...[
+            ListTile(
+              leading: Icon(Icons.table_view),
+              title: Text('ປະຫວັດການຂາຍ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SalesHistoryPage()));
+              },
+            ),
+            Divider(
+              endIndent: 15.0,
+              indent: 15.0,
+            ),
+          ],
           if (userRole == 'Admin') ...[
             ListTile(
               leading: Icon(Icons.inventory),
@@ -137,25 +172,40 @@ class _AppDrawerState extends State<AppDrawer> {
                         builder: (context) => ManageAuthorPage()));
               },
             ),
+            Divider(
+              endIndent: 15.0,
+              indent: 15.0,
+            ),
           ],
-          ListTile(
-            leading: Icon(Icons.table_view),
-            title: Text('ປະຫວັດການຂາຍ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SalesHistoryPage()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.download),
-            title: Text('ການນຳເຂົ້າສິນຄ້າ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ManageImportPage()));
-            },
-          ),
+          if (userRole == 'Stocker' || userRole == 'Admin') ...[
+            ListTile(
+              leading: Icon(Icons.emoji_transportation_rounded),
+              title: Text('ຈັດການຜູ້ສະໜອງ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ManageSuppliersPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.download),
+              title: Text('ການນຳເຂົ້າສິນຄ້າ'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ManageImportPage()));
+              },
+            ),
+            Divider(
+              endIndent: 15.0,
+              indent: 15.0,
+            ),
+          ],
           if (userRole == 'Admin') ...[
             ListTile(
               leading: Icon(Icons.star),
@@ -180,17 +230,12 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
           ],
-          ListTile(
-            leading: Icon(Icons.emoji_transportation_rounded),
-            title: Text('ຈັດການຜູ້ສະໜອງ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ManageSuppliersPage()),
-              );
-            },
-          ),
+          if (userRole == 'Admin') ...[
+            Divider(
+              endIndent: 15.0,
+              indent: 15.0,
+            ),
+          ],
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('ຕັ້ງຄ່າ'),

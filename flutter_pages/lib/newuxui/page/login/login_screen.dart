@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
+import 'package:flutter_lect2/newuxui/page/Import/Import_page.dart';
 import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
 import 'package:flutter_lect2/newuxui/widget/Custom_Button.dart';
 import 'package:http/http.dart' as http;
@@ -87,9 +88,26 @@ class _LoginScreenState extends State<LoginScreen> {
             showMessage("Login Successful", false);
 
             // ໄປໜ້າ Home
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => SalePage()),
-            );
+
+            if (role == 'Admin')
+              [
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => SalePage()),
+                ),
+              ];
+            else if (role == 'Cashier')
+              [
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => SalePage()),
+                ),
+              ];
+            else if (role == 'Stocker')
+              [
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => ManageImportPage()),
+                ),
+              ];
+
             break;
           }
         }

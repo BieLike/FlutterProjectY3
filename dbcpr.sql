@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 10, 2025 at 11:21 AM
+-- Generation Time: Jul 11, 2025 at 04:57 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -134,7 +134,9 @@ INSERT INTO `tbimport` (`ImportID`, `ImportDate`, `ImportTime`, `TotalItems`, `T
 (21, '2025-07-09', '10:31:00', 15, 300000.00, 'Cityplex', '2022136258', '', '', 'Completed', 1, '2025-07-09 10:32:02'),
 (22, '2025-07-09', '10:57:00', 50, 750000.00, 'Cityplex', '2022136258', '', '', 'Completed', 1, '2025-07-09 10:58:19'),
 (23, '2025-07-09', '11:16:00', 30, 600.00, 'Cityplex', '2022136258', '', '', 'Completed', 1, '2025-07-09 11:17:03'),
-(24, '2025-07-09', '14:13:00', 50, 250000.00, 'Maxza', '2058384765', '', '', 'Completed', 1, '2025-07-09 14:13:44');
+(24, '2025-07-09', '14:13:00', 50, 250000.00, 'Maxza', '2058384765', '', '', 'Completed', 1, '2025-07-09 14:13:44'),
+(25, '2025-07-10', '16:26:00', 20, 300000.00, 'Maxza', '2058384765', '', '', 'Completed', 1, '2025-07-10 16:26:50'),
+(26, '2025-07-11', '09:13:00', 25, 375000.00, 'Maxza', '2058384765', '', '', 'Completed', 1, '2025-07-11 09:15:00');
 
 -- --------------------------------------------------------
 
@@ -187,7 +189,10 @@ INSERT INTO `tbimportdetail` (`ImportDetailID`, `ImportID`, `ProductID`, `Import
 (26, 21, 'Kpo1155', 15, 20000.00, 300000.00, 50, 65, NULL),
 (27, 22, 'Kpo1119', 50, 15000.00, 750000.00, 29, 79, NULL),
 (28, 23, 'Tgh1111', 30, 20.00, 600.00, 70, 100, NULL),
-(29, 24, 'Ois1114', 50, 5000.00, 250000.00, 52, 102, NULL);
+(29, 24, 'Ois1114', 50, 5000.00, 250000.00, 52, 102, NULL),
+(30, 25, 'Kpo1155', 20, 15000.00, 300000.00, 65, 85, NULL),
+(31, 26, 'Ois1114', 10, 15000.00, 150000.00, 102, 112, NULL),
+(32, 26, 'Tgh1111', 15, 15000.00, 225000.00, 105, 120, NULL);
 
 -- --------------------------------------------------------
 
@@ -215,11 +220,11 @@ CREATE TABLE `tbproduct` (
 INSERT INTO `tbproduct` (`ProductID`, `ProductName`, `Quantity`, `ImportPrice`, `SellPrice`, `UnitID`, `CategoryID`, `authorsID`, `Balance`, `Level`) VALUES
 ('Kpo1112', 'Kraprao_Freeze', 256, 33000, 37000, '14', '1230', 2, 270, 5),
 ('Kpo1119', 'Kraprao_fatasses', 79, 33000, 37000, 'Bg1112', 'Fd1112', 1, 100, 5),
-('Kpo1155', 'Kraprao_fastest', 65, 33000, 37000, 'Bg1112', 'Fd1112', 1, 65, 5),
+('Kpo1155', 'Kraprao_fastest', 85, 33000, 37000, 'Bg1112', 'Fd1112', 1, 85, 5),
 ('l2', 'vhf', 5, 8, 1, '15', 'Wtr1111', 1, 0, 5),
 ('Lay1111', 'Lay_Original_Big_Bag', 115, 15000, 18000, 'Bg1112', 'Fd1112', 1, 131, 10),
-('Ois1114', 'Oishi_small', 102, 12000, 15000, 'bt1115', 'Wtr1111', 1, 106, 10),
-('Tgh1111', 'Tiger_Head_Big', 105, 8000, 10000, 'bt1115', 'Wtr1111', 1, 108, 5);
+('Ois1114', 'Oishi_small', 112, 12000, 15000, 'bt1115', 'Wtr1111', 1, 116, 10),
+('Tgh1111', 'Tiger_Head_Big', 120, 8000, 10000, 'bt1115', 'Wtr1111', 1, 123, 5);
 
 -- --------------------------------------------------------
 
@@ -479,13 +484,13 @@ ALTER TABLE `tbuser`
 -- AUTO_INCREMENT for table `tbimport`
 --
 ALTER TABLE `tbimport`
-  MODIFY `ImportID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `ImportID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `tbimportdetail`
 --
 ALTER TABLE `tbimportdetail`
-  MODIFY `ImportDetailID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `ImportDetailID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `tbrole`
