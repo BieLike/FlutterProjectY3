@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lect2/newuxui/backupManagement.dart';
 import 'package:flutter_lect2/newuxui/page/Import/Import_page.dart';
 import 'package:flutter_lect2/newuxui/page/Sell_History/new_sellHistory.dart';
 import 'package:flutter_lect2/newuxui/page/UnC/ManageCategoriesPage.dart';
@@ -113,7 +114,7 @@ class _AppDrawerState extends State<AppDrawer> {
           ],
           if (userRole == 'Cashier' || userRole == 'Admin') ...[
             ListTile(
-              leading: Icon(Icons.table_view),
+              leading: Icon(Icons.watch_later_outlined),
               title: Text('ປະຫວັດການຂາຍ'),
               onTap: () {
                 Navigator.pop(context);
@@ -162,7 +163,7 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.table_view),
+              leading: Icon(Icons.person_pin_outlined),
               title: Text('ຈັດການຂໍ້ມູນຜູ້ແຕ່ງ'),
               onTap: () {
                 Navigator.pop(context);
@@ -234,6 +235,17 @@ class _AppDrawerState extends State<AppDrawer> {
             Divider(
               endIndent: 15.0,
               indent: 15.0,
+            ),
+            ListTile(
+              leading: Icon(Icons.recycling),
+              title: Text('Restore'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BackupRestorePage()),
+                );
+              },
             ),
           ],
           ListTile(

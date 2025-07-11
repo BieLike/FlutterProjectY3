@@ -467,7 +467,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                                     controller: txtNewName,
                                     decoration: InputDecoration(
                                       labelText: 'ຊື່ໃໝ່',
-                                      hintText: 'ປ້ອນຊື່ໃໝ່',
+                                      hintText: 'ປ້ອນຊື່ໃໝ່ຫົວໜ່ວຍ',
                                       labelStyle:
                                           TextStyle(color: Colors.green),
                                       border: OutlineInputBorder(
