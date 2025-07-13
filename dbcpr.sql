@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 13, 2025 at 09:13 AM
+-- Generation Time: Jul 13, 2025 at 11:49 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -99,7 +99,18 @@ INSERT INTO `tbactivity_log` (`LogID`, `EmployeeID`, `EmployeeName`, `ActionType
 (54, 8, 'kham', 'CREATE', 'tbsell', '30', 'ສ້າງລາຍການຂາຍ #30 ລວມ 1 ລາຍການ', '2025-07-13 05:20:13'),
 (55, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 06:09:04'),
 (56, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 06:11:26'),
-(57, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 06:12:50');
+(57, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 06:12:50'),
+(58, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:23:30'),
+(59, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:26:12'),
+(60, 1, 'Sanhsaveng', 'LOGIN', 'tbuser', '1', 'ຜູ້ໃຊ້ \'Sanhsaveng\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:29:36'),
+(61, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:30:35'),
+(62, 8, 'kham', 'LOGIN', 'tbuser', '8', 'ຜູ້ໃຊ້ \'kham\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:32:11'),
+(63, 1, 'Sanhsaveng', 'LOGIN', 'tbuser', '1', 'ຜູ້ໃຊ້ \'Sanhsaveng\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:32:27'),
+(64, 1, 'Sanhsaveng', 'LOGIN', 'tbuser', '1', 'ຜູ້ໃຊ້ \'Sanhsaveng\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:33:07'),
+(65, 2, 'Test', 'LOGIN', 'tbuser', '2', 'ຜູ້ໃຊ້ \'Test\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:33:31'),
+(66, 1, 'Sanhsaveng', 'LOGIN', 'tbuser', '1', 'ຜູ້ໃຊ້ \'Sanhsaveng\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:34:11'),
+(67, 1, 'Sanhsaveng', 'LOGIN', 'tbuser', '1', 'ຜູ້ໃຊ້ \'Sanhsaveng\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:38:19'),
+(68, 1, 'Sanhsaveng', 'LOGIN', 'tbuser', '1', 'ຜູ້ໃຊ້ \'Sanhsaveng\' ໄດ້ເຂົ້າສູ່ລະບົບ.', '2025-07-13 09:40:50');
 
 -- --------------------------------------------------------
 
@@ -303,9 +314,9 @@ CREATE TABLE `tbrole` (
 --
 
 INSERT INTO `tbrole` (`RID`, `RoleName`, `BaseSalary`) VALUES
-(1, 'Employee', 2500000),
+(1, 'Cashier', 2500000),
 (2, 'Admin', 3500000),
-(5, 'RameNole', 2000);
+(5, 'Stocker', 2000);
 
 -- --------------------------------------------------------
 
@@ -476,9 +487,9 @@ CREATE TABLE `tbuser` (
 
 INSERT INTO `tbuser` (`UID`, `UserFname`, `UserLname`, `DateOfBirth`, `Gender`, `Phone`, `Email`, `Position`, `UserPassword`) VALUES
 (1, 'Sanhsaveng', 'KeoKham', '18/07/2013', 'ຍິງ', 123, 'Sanhsaveng@gmail.com', 2, '123'),
-(2, 'Test', 'Subject', '2011-11-11', 'ຊາຍ', 2052135264, 'TestSubject@gmail.co', 1, 'Tes111'),
+(2, 'Test', 'Subject', '2011-11-11', 'ຊາຍ', 2, 'TestSubject@gmail.co', 5, '2'),
 (7, 'tes', 'tesin', '11/07/2002', 'ຍິງ', 2035262353, 'Tes@gmail.com', 1, '11111111'),
-(8, 'kham', 'kham', '1/1/2000', 'ຊາຍ', 1, 'ggkham@gmail.com', 2, '1');
+(8, 'kham', 'kham', '1/1/2000', 'ຊາຍ', 1, 'ggkham@gmail.com', 1, '1');
 
 --
 -- Indexes for dumped tables
@@ -580,7 +591,7 @@ ALTER TABLE `tbuser`
 -- AUTO_INCREMENT for table `tbactivity_log`
 --
 ALTER TABLE `tbactivity_log`
-  MODIFY `LogID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `LogID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT for table `tbimport`
