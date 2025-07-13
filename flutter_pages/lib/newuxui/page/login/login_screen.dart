@@ -1,14 +1,14 @@
 import 'dart:convert';
-// import 'package:animate_do/animate_do.dart'; //animate_do: ^4.2.0
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/page/Import/Import_page.dart';
+import 'package:flutter_lect2/newuxui/page/mornitor/Mornitoring_page.dart';
 import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
 import 'package:flutter_lect2/newuxui/widget/Custom_Button.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; //ລົງໃນ pubspec shared_preferences: ^2.5.3
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,116 +20,90 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
   final String baseUrl = basePath().bpath();
   bool isLoading = false;
   bool showPassword = false;
 
   void showMessage(String message, bool isError) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.red : Colors.green,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
 
+  // [EDIT] ปรับปรุงฟังก์ชัน Login ใหม่ทั้งหมด
   Future<void> login() async {
     final String phone = phoneController.text.trim();
     final String password = passwordController.text.trim();
 
     if (phone.isEmpty || password.isEmpty) {
-      showMessage("Please enter Phone and Password", true);
+      showMessage("ກະລຸນາປ້ອນເບີໂທ ແລະ ລະຫັດຜ່ານ", true);
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
-      // get all users from server
-      final usersUrl = Uri.parse("$baseUrl/main/user");
-      final usersResponse = await http.get(usersUrl);
-      final roleUrl = Uri.parse("$baseUrl/main/user/login");
-      final roleResponse = await http.post(
-        roleUrl,
+      final response = await http.post(
+        Uri.parse("$baseUrl/main/user/login"),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"Phone": int.parse(phone), "UserPassword": password}),
+        body: jsonEncode({
+          "Phone": int.tryParse(phone) ?? 0, // แปลงเป็น int
+          "UserPassword": password
+        }),
       );
 
-      if (usersResponse.statusCode == 200 && roleResponse.statusCode == 200) {
-        final List<dynamic> users = jsonDecode(usersResponse.body);
-        final data = jsonDecode(roleResponse.body);
-        String role = data['RoleName'] ?? 'Unknown';
-        String name = data['UserFname'] ?? 'Unknown';
+      final data = jsonDecode(response.body);
 
-        // change pheone to int
-        int phoneInt = int.parse(phone);
+      if (response.statusCode == 200 && data['success'] == true) {
+        final Map<String, dynamic> user = data['user'];
 
-        // sreach for user
-        bool userFound = false;
-        for (var user in users) {
-          if (user['Phone'] == phoneInt && user['UserPassword'] == password) {
-            userFound = true;
+        // บันทึกข้อมูลผู้ใช้ทั้งหมดลง SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_data', json.encode(user));
+        await prefs.setBool('is_logged_in', true);
 
-            // enroll user data to SharedPreferences
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('user_data', json.encode(user));
-            await prefs.setBool('is_logged_in', true);
-            await prefs.setString('role', role);
-            await prefs.setString('UserFname', name);
+        showMessage("Login Successful!", false);
 
-            setState(() {
-              isLoading = false;
-            });
-
-            showMessage("Login Successful", false);
-
-            // ໄປໜ້າ Home
-
-            if (role == 'Admin')
-              [
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => SalePage()),
-                ),
-              ];
-            else if (role == 'Cashier')
-              [
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => SalePage()),
-                ),
-              ];
-            else if (role == 'Stocker')
-              [
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => ManageImportPage()),
-                ),
-              ];
-
-            break;
-          }
-        }
-
-        if (!userFound) {
-          setState(() {
-            isLoading = false;
-          });
-          showMessage("Invalid Phone or Password", true);
-        }
+        // นำทางตามตำแหน่ง
+        final String role = user['RoleName'] ?? '';
+        _navigateBasedOnRole(role);
       } else {
-        setState(() {
-          isLoading = false;
-        });
-        showMessage("Error connecting to server", true);
+        showMessage(data['msg'] ?? "Login failed", true);
       }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      showMessage("Error: $e", true);
+      showMessage("Error: ${e.toString()}", true);
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
+  }
+
+  void _navigateBasedOnRole(String role) {
+    Widget landingPage;
+    switch (role.toLowerCase()) {
+      case 'admin':
+        landingPage = const DashboardAndLogPage();
+        break;
+      case 'cashier':
+        landingPage = const SalePage();
+        break;
+      case 'stocker':
+        landingPage = const ManageImportPage();
+        break;
+      default:
+        //
+        landingPage = const Scaffold(
+            body: Center(child: Text("You do not have access to any page.")));
+        break;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => landingPage),
+    );
   }
 
   @override

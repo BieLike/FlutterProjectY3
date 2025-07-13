@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
-import 'package:flutter_lect2/newuxui/page/Import/Import_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateImportPage extends StatefulWidget {
   const CreateImportPage({super.key});
@@ -95,8 +95,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
     try {
       setState(() => _isLoadingSuppliers = true);
 
-      final response =
-          await http.get(Uri.parse("$baseurl/main/supplier/active"));
+      final response = await http.get(Uri.parse("$baseurl/main/supplier"));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -105,7 +104,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
           _isLoadingSuppliers = false;
         });
       } else {
-        throw Exception('Not found');
+        throw Exception('Failed to load suppliers');
       }
     } catch (e) {
       setState(() => _isLoadingSuppliers = false);
@@ -342,7 +341,18 @@ class _CreateImportPageState extends State<CreateImportPage> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Prepare import data
+      // 1. ດຶງຂໍ້ມູນຜູ້ໃຊ້ຈາກ SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userDataString = prefs.getString('user_data');
+      if (userDataString == null) {
+        _showErrorMessage("ບໍ່ພົບຂໍ້ມູນຜູ້ໃຊ້, ກະລຸນາລັອກອິນໃໝ່");
+        setState(() => _isSubmitting = false);
+        return;
+      }
+      final userData = json.decode(userDataString);
+      final employeeID = userData['UID'];
+      final employeeName = userData['UserFname'];
+
       final importData = {
         'ImportDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
         'ImportTime':
@@ -351,7 +361,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
         'SupplierContact': _supplierContactController.text.trim(),
         'InvoiceNumber': _invoiceNumberController.text.trim(),
         'Notes': _notesController.text.trim(),
-        'CreatedBy': 1, // TODO: Replace with actual user ID from session
+        'CreatedBy': employeeID,
         'items': _importItems
             .map((item) => {
                   'ProductID': item['ProductID'],
@@ -363,8 +373,11 @@ class _CreateImportPageState extends State<CreateImportPage> {
                       : item['BatchNumber'].toString().trim(),
                 })
             .toList(),
-      };
 
+        // ສົ່ງໄປ Activity Log ***
+        'EmployeeID': employeeID,
+        'EmployeeName': employeeName,
+      };
       final response = await http.post(
         Uri.parse("$baseurl/main/import"),
         headers: {'Content-Type': 'application/json'},
@@ -375,11 +388,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
         final responseData = json.decode(response.body);
         _showSuccessMessage(
             "Import created successfully! Import ID: ${responseData['importID']}");
-
-        // Navigate back to import list
         Navigator.pop(context);
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ManageImportPage()));
       } else {
         final errorData = json.decode(response.body);
         _showErrorMessage(errorData['msg'] ?? 'Failed to create import');
@@ -472,6 +481,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
         title: Text('ສ້າງການນຳເຂົ້າ'),
         backgroundColor: Color(0xFFE45C58),
@@ -658,6 +668,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 // Date picker
                 Expanded(
                   child: InkWell(
+                    onTap: _selectDate,
                     child: Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -683,6 +694,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                 // Time picker
                 Expanded(
                   child: InkWell(
+                    onTap: _selectTime,
                     child: Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -780,7 +792,7 @@ class _CreateImportPageState extends State<CreateImportPage> {
                         return ListTile(
                           dense: true,
                           title: Text(
-                            supplier['SupplierName'] ?? 'N/A',
+                            supplier['ຊື່ຜູ້ສະໜອງ'] ?? 'N/A',
                             style: TextStyle(fontSize: 14),
                           ),
                           subtitle: Text(

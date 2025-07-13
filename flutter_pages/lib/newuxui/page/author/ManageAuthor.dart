@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageAuthorPage extends StatefulWidget {
   const ManageAuthorPage({super.key});
@@ -30,6 +31,16 @@ class _AuthorPageState extends State<ManageAuthorPage> {
     super.initState();
   }
 
+  Future<Map<String, dynamic>?> _getEmployeeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDataString = prefs.getString('user_data');
+    if (userDataString == null) {
+      ShowErrorMessage("ບໍ່ພົບຜູ້ໃຊ້, ກະລຸນາລັອກອິນໃໝ່");
+      return null;
+    }
+    return json.decode(userDataString);
+  }
+
   // --- GET All Authors ---
   Future<void> FetchAllAuthors() async {
     setState(() {
@@ -48,7 +59,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
         setState(() {
           isLoading = false;
         });
-        ShowErrorMessage("Failed to fetch authors. Status: ${response.statusCode}");
+        ShowErrorMessage(
+            "Failed to fetch authors. Status: ${response.statusCode}");
       }
     } catch (e) {
       print(e);
@@ -69,7 +81,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
       isLoading = true;
     });
     try {
-      final String urlf = "$baseurl/main/author/$searchTerm"; // Changed endpoint to /author/:search
+      final String urlf =
+          "$baseurl/main/author/$searchTerm"; // Changed endpoint to /author/:search
       final response = await http.get(Uri.parse(urlf));
       if (response.statusCode == 200) {
         setState(() {
@@ -87,7 +100,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
         setState(() {
           isLoading = false;
         });
-        ShowErrorMessage("Failed to search authors. Status: ${response.statusCode}");
+        ShowErrorMessage(
+            "Failed to search authors. Status: ${response.statusCode}");
       }
     } catch (e) {
       print(e);
@@ -122,15 +136,20 @@ class _AuthorPageState extends State<ManageAuthorPage> {
       isLoading = true;
     });
 
+    final employeeData = await _getEmployeeData();
+    if (employeeData == null) {
+      setState(() => isLoading = false);
+      return;
+    }
+
     try {
-      // Your API already handles the "in use" check with a 409 status code.
-      // So, the separate /product check logic is not strictly needed here
-      // if the backend is robust.
-      // I'm simplifying this part to directly call the delete endpoint
-      // and handle the 409 error as per your API spec.
       final response = await http.delete(
-        Uri.parse("$baseurl/main/author/$authorId"), // Changed endpoint to /author/:id
+        Uri.parse("$baseurl/main/author/$authorId"),
         headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "EmployeeID": employeeData['UID'],
+          "EmployeeName": employeeData['UserFname']
+        }),
       );
 
       setState(() {
@@ -140,13 +159,16 @@ class _AuthorPageState extends State<ManageAuthorPage> {
       if (response.statusCode == 200) {
         FetchAllAuthors();
         final responseBody = json.decode(response.body);
-        ShowSuccessMessage(responseBody['msg'] ?? "Author deleted successfully!");
+        ShowSuccessMessage(
+            responseBody['msg'] ?? "Author deleted successfully!");
       } else if (response.statusCode == 409) {
         final responseBody = json.decode(response.body);
-        ShowErrorMessage(responseBody['message'] ?? "Cannot delete author: It is still in use.");
+        ShowErrorMessage(responseBody['message'] ??
+            "Cannot delete author: It is still in use.");
       } else {
         final responseBody = json.decode(response.body);
-        ShowErrorMessage(responseBody['msg'] ?? "Failed to delete author. Status: ${response.statusCode}");
+        ShowErrorMessage(responseBody['msg'] ??
+            "Failed to delete author. Status: ${response.statusCode}");
       }
     } catch (e) {
       setState(() {
@@ -215,6 +237,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
       setState(() {
         isLoading = true;
       });
+      final employeeData = await _getEmployeeData();
+      if (employeeData == null) return;
 
       try {
         final response = await http.post(
@@ -223,6 +247,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
           body: jsonEncode({
             "authorID": txtAuthorID.text, // Changed key to authorID
             "name": txtAuthorName.text, // Changed key to name
+            "EmployeeID": employeeData['UID'],
+            "EmployeeName": employeeData['UserFname']
           }),
         );
 
@@ -236,10 +262,12 @@ class _AuthorPageState extends State<ManageAuthorPage> {
           FetchAllAuthors();
           Navigator.of(context).pop();
         } else if (response.statusCode == 300) {
-          ShowErrorMessage("This author already Existed"); // Matched API message
+          ShowErrorMessage(
+              "This author already Existed"); // Matched API message
         } else {
           final respondBody = json.decode(response.body);
-          ShowErrorMessage(respondBody['msg'] ?? "Failed to add author. Status: ${response.statusCode}");
+          ShowErrorMessage(respondBody['msg'] ??
+              "Failed to add author. Status: ${response.statusCode}");
         }
       } catch (e) {
         setState(() {
@@ -256,22 +284,32 @@ class _AuthorPageState extends State<ManageAuthorPage> {
       // If NewAuthorID or NewName are empty, the API will use the existing values.
       // However, it's good practice to send the values if they exist in the text controllers.
       if (txtAuthorID.text.isEmpty || txtAuthorName.text.isEmpty) {
-         ShowErrorMessage("Original Author ID and Name are required for update.");
-         return;
+        ShowErrorMessage(
+            "Original Author ID and Name are required for update.");
+        return;
       }
 
       setState(() {
         isLoading = true;
       });
+      final employeeData = await _getEmployeeData();
+      if (employeeData == null) return;
 
       try {
         final response = await http.put(
-          Uri.parse("$baseurl/main/author/$originalAuthorID"), // Changed endpoint to /author/:id
+          Uri.parse(
+              "$baseurl/main/author/$originalAuthorID"), // Changed endpoint to /author/:id
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            "NewAuthorID": txtNewAuthorID.text.isEmpty ? txtAuthorID.text : txtNewAuthorID.text, // Use current if new is empty
+            "NewAuthorID": txtNewAuthorID.text.isEmpty
+                ? txtAuthorID.text
+                : txtNewAuthorID.text, // Use current if new is empty
             "name": txtAuthorName.text, // Existing name
-            "NewName": txtNewAuthorName.text.isEmpty ? txtAuthorName.text : txtNewAuthorName.text, // Use current if new is empty
+            "NewName": txtNewAuthorName.text.isEmpty
+                ? txtAuthorName.text
+                : txtNewAuthorName.text, // Use current if new is empty
+            "EmployeeID": employeeData['UID'],
+            "EmployeeName": employeeData['UserFname']
           }),
         );
         setState(() {
@@ -282,14 +320,16 @@ class _AuthorPageState extends State<ManageAuthorPage> {
           FetchAllAuthors();
           Navigator.of(context).pop();
           final responseBody = json.decode(response.body);
-          ShowSuccessMessage(responseBody['msg'] ?? "Author updated successfully"); // Matched API message
+          ShowSuccessMessage(responseBody['msg'] ??
+              "Author updated successfully"); // Matched API message
         } else if (response.statusCode == 409) {
           final respondBody = json.decode(response.body);
-          ShowErrorMessage(respondBody['msg'] ?? "Author ID or name already exists."); // Matched API message
-        }
-        else {
+          ShowErrorMessage(respondBody['msg'] ??
+              "Author ID or name already exists."); // Matched API message
+        } else {
           final respondBody = json.decode(response.body);
-          ShowErrorMessage(respondBody['msg'] ?? "Failed to update author. Status: ${response.statusCode}");
+          ShowErrorMessage(respondBody['msg'] ??
+              "Failed to update author. Status: ${response.statusCode}");
         }
       } catch (e) {
         setState(() {
@@ -307,7 +347,9 @@ class _AuthorPageState extends State<ManageAuthorPage> {
           borderRadius: BorderRadius.circular(15),
         ),
         title: Text(
-          authorData != null ? "ແກ້ໄຂນັກຂຽນ" : "ເພີ່ມນັກຂຽນ", // Changed "ຫົວໜ່ວຍ" to "ນັກຂຽນ"
+          authorData != null
+              ? "ແກ້ໄຂນັກຂຽນ"
+              : "ເພີ່ມນັກຂຽນ", // Changed "ຫົວໜ່ວຍ" to "ນັກຂຽນ"
           style: TextStyle(color: Color(0xFFE45C58)),
         ),
         content: Container(
@@ -396,7 +438,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
                           Expanded(
                             flex: 3,
                             child: TextField(
-                              controller: txtAuthorName, // Changed to txtAuthorName
+                              controller:
+                                  txtAuthorName, // Changed to txtAuthorName
                               enabled: false,
                               decoration: InputDecoration(
                                 labelText: 'ຊື່ປັດຈຸບັນ', // Changed label
@@ -427,7 +470,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
                           Expanded(
                             flex: 2,
                             child: TextField(
-                              controller: txtNewAuthorID, // Changed to txtNewAuthorID
+                              controller:
+                                  txtNewAuthorID, // Changed to txtNewAuthorID
                               decoration: InputDecoration(
                                 labelText: 'ID ໃໝ່', // Changed label
                                 hintText: 'ປ້ອນ ID ນັກຂຽນໃໝ່', // Changed hint
@@ -446,7 +490,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
                           Expanded(
                             flex: 3,
                             child: TextField(
-                              controller: txtNewAuthorName, // Changed to txtNewAuthorName
+                              controller:
+                                  txtNewAuthorName, // Changed to txtNewAuthorName
                               decoration: InputDecoration(
                                 labelText: 'ຊື່ໃໝ່', // Changed label
                                 hintText: 'ປ້ອນຊື່ໃໝ່', // Changed hint
@@ -484,7 +529,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
           TextButton(
             onPressed: () {
               if (authorData != null) {
-                UpdateAuthor(authorData['authorID'].toString()); // Changed to authorData['authorID']
+                UpdateAuthor(authorData['authorID']
+                    .toString()); // Changed to authorData['authorID']
               } else {
                 AddAuthor();
               }
@@ -513,8 +559,9 @@ class _AuthorPageState extends State<ManageAuthorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
-        title: Text('ຈັດການນັກຂຽນ'), // Changed title
+        title: Text('ຈັດການຜູ້ແຕ່ງ'), // Changed title
         backgroundColor: Color(0xFFE45C58),
         foregroundColor: Colors.white,
       ),
@@ -563,7 +610,8 @@ class _AuthorPageState extends State<ManageAuthorPage> {
                             final author = data[index]; // Changed variable name
                             return Card(
                               elevation: 3,
-                              margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),
                               ),
@@ -595,14 +643,20 @@ class _AuthorPageState extends State<ManageAuthorPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: Icon(Icons.edit, color: Color(0xFFE45C58)),
-                                      onPressed: () => ShowAuthorDataDialog(authorData: author), // Changed function name and parameter
+                                      icon: Icon(Icons.edit,
+                                          color: Color(0xFFE45C58)),
+                                      onPressed: () => ShowAuthorDataDialog(
+                                          authorData:
+                                              author), // Changed function name and parameter
                                     ),
                                     IconButton(
-                                      icon: Icon(Icons.delete, color: Colors.red),
+                                      icon:
+                                          Icon(Icons.delete, color: Colors.red),
                                       onPressed: () => ShowDeleteConfirmation(
-                                        author['authorID'].toString(), // Changed key to authorID
-                                        author['name'].toString(), // Changed key to name
+                                        author['authorID']
+                                            .toString(), // Changed key to authorID
+                                        author['name']
+                                            .toString(), // Changed key to name
                                       ),
                                     ),
                                   ],

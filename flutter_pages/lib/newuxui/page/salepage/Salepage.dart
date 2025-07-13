@@ -1,29 +1,34 @@
 import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/page/salepage/Payment_page.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class SalePage extends StatefulWidget {
   const SalePage({Key? key}) : super(key: key);
-
   @override
   State<SalePage> createState() => _SalePageState();
 }
 
 class _SalePageState extends State<SalePage> {
-  // --- State ---
   final String baseUrl = basePath().bpath();
   bool isLoading = true;
   List allProducts = [];
   List displayedProducts = [];
   List cartItems = [];
   double totalAmount = 0;
-
   TextEditingController searchController = TextEditingController();
+
   List allCategories = [];
   String? selectedCategoryId;
+  // [ADD] เพิ่ม State สำหรับ Author
+  List allAuthors = [];
+  int? selectedAuthorId;
+
+  final formatter = NumberFormat("#,##0");
 
   @override
   void initState() {
@@ -37,17 +42,17 @@ class _SalePageState extends State<SalePage> {
     super.dispose();
   }
 
-  // --- Data Fetching ---
   Future<void> _loadInitialData() async {
     setState(() => isLoading = true);
-    await Future.wait([_fetchProducts(), _fetchCategories()]);
-    setState(() => isLoading = false);
+    // [EDIT] เพิ่มการดึงข้อมูลผู้เขียน
+    await Future.wait([_fetchProducts(), _fetchCategories(), _fetchAuthors()]);
+    if (mounted) setState(() => isLoading = false);
   }
 
   Future<void> _fetchProducts() async {
     try {
       final response = await http.get(Uri.parse("$baseUrl/main/product"));
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && mounted) {
         allProducts = json.decode(response.body);
         _filterProducts();
       }
@@ -59,7 +64,7 @@ class _SalePageState extends State<SalePage> {
   Future<void> _fetchCategories() async {
     try {
       final response = await http.get(Uri.parse("$baseUrl/main/category"));
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && mounted) {
         allCategories = json.decode(response.body);
       }
     } catch (e) {
@@ -67,35 +72,50 @@ class _SalePageState extends State<SalePage> {
     }
   }
 
-  // --- Filtering ---
+  // [ADD] ฟังก์ชันสำหรับดึงข้อมูลผู้เขียน
+  Future<void> _fetchAuthors() async {
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/main/author"));
+      if (response.statusCode == 200 && mounted) {
+        allAuthors = json.decode(response.body);
+      }
+    } catch (e) {
+      _showFeedback("Error fetching authors: $e", isError: true);
+    }
+  }
+
   void _filterProducts() {
     setState(() {
       displayedProducts = allProducts.where((product) {
-        final bool categoryMatch =
-            selectedCategoryId == null ||
+        final bool categoryMatch = selectedCategoryId == null ||
             product['CategoryID'] == selectedCategoryId;
-        final bool searchMatch =
-            searchController.text.isEmpty ||
-            product['ProductName'].toString().toLowerCase().contains(
-              searchController.text.toLowerCase(),
-            );
-        return categoryMatch && searchMatch;
+        final bool authorMatch = selectedAuthorId == null ||
+            product['authorsID'] == selectedAuthorId;
+
+        // [EDIT] เพิ่มการค้นหาด้วย ProductID
+        final bool searchMatch = searchController.text.isEmpty ||
+            product['ProductName']
+                .toString()
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase()) ||
+            product['ProductID']
+                .toString()
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase());
+
+        return categoryMatch && authorMatch && searchMatch;
       }).toList();
     });
   }
 
-  // --- Cart Management ---
   void addToCart(Map<String, dynamic> product) {
     if ((product['Quantity'] ?? 0) <= 0) {
       _showFeedback("ສິນຄ້າໝົດແລ້ວ", isError: true);
       return;
     }
-
     setState(() {
-      int existingIndex = cartItems.indexWhere(
-        (item) => item['ProductID'] == product['ProductID'],
-      );
-
+      int existingIndex = cartItems
+          .indexWhere((item) => item['ProductID'] == product['ProductID']);
       if (existingIndex >= 0) {
         if (cartItems[existingIndex]['quantity'] < product['Quantity']) {
           cartItems[existingIndex]['quantity']++;
@@ -116,7 +136,6 @@ class _SalePageState extends State<SalePage> {
       if (cartItems[index]['quantity'] < cartItems[index]['Quantity']) {
         cartItems[index]['quantity']++;
         _calculateTotal();
-        // ອັບເດດ UI ຂອງ Bottom Sheet ຖ້າມີ
         updater?.call(() {});
       } else {
         _showFeedback("ສິນຄ້າໃນສະຕັອກບໍ່ພໍ", isError: true);
@@ -130,17 +149,19 @@ class _SalePageState extends State<SalePage> {
         cartItems[index]['quantity']--;
       } else {
         cartItems.removeAt(index);
+        if (cartItems.isEmpty && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
       }
       _calculateTotal();
       updater?.call(() {});
     });
   }
 
-  void _calculateTotal() {
-    totalAmount = cartItems.fold(0.0, (sum, item) {
-      return sum + ((item['SellPrice'] ?? 0.0) * (item['quantity'] ?? 0));
-    });
-  }
+  void _calculateTotal() => setState(() => totalAmount = cartItems.fold(
+      0.0,
+      (sum, item) =>
+          sum + ((item['SellPrice'] ?? 0) * (item['quantity'] ?? 0))));
 
   void _proceedToPayment() {
     if (cartItems.isEmpty) {
@@ -153,139 +174,117 @@ class _SalePageState extends State<SalePage> {
         builder: (context) => PaymentPage(
           cartItems: cartItems,
           totalAmount: totalAmount,
-          onPaymentComplete: () {
-            setState(() {
-              cartItems.clear();
-              totalAmount = 0;
-            });
-          },
+          onPaymentComplete: () => setState(() {
+            cartItems.clear();
+            totalAmount = 0;
+            _loadInitialData();
+          }),
         ),
       ),
     );
   }
 
-  // --- UI ---
   void _showFeedback(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.red : Colors.green,
         duration: Duration(seconds: 1),
-      ),
-    );
+      ));
   }
 
-  // *** ຟັງຊັນແກ້ໄຂຈຳນວນ ***
   void _showEditQuantityDialog(int index, {StateSetter? updater}) {
     final item = cartItems[index];
-    final quantityController = TextEditingController(
-      text: item['quantity'].toString(),
-    );
-
+    final quantityController =
+        TextEditingController(text: item['quantity'].toString());
     showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("ແກ້ໄຂຈຳນວນສິນຄ້າ"),
-          content: TextField(
-            controller: quantityController,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            decoration: InputDecoration(
-              labelText: "ໃສ່ຈຳນວນທີ່ຕ້ອງການ",
-              hintText: "Enter quantity",
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text("ຍົກເລີກ"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            ElevatedButton(
-              child: Text("ຍືນຢັນ"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE45C58),
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                final newQuantity = int.tryParse(quantityController.text);
-                if (newQuantity != null && newQuantity > 0) {
-                  if (newQuantity <= item['Quantity']) {
-                    setState(() {
-                      // ອັບເດດ State ຫຼັກ
-                      cartItems[index]['quantity'] = newQuantity;
-                      _calculateTotal();
-                    });
-                    updater?.call(() {}); // ອັບເດດ Bottom Sheet
-                    Navigator.of(context).pop();
-                  } else {
-                    Navigator.of(context).pop();
-                    _showFeedback('ສິນຄ້າໃນສະຕັອກບໍ່ພໍ ', isError: true);
-                  }
-                } else if (newQuantity != null && newQuantity <= 0) {
-                  setState(() {
-                    // ອັບເດດ State ຫຼັກ
-                    cartItems.removeAt(index);
-                    _calculateTotal();
-                  });
-                  updater?.call(() {}); // ອັບເດດ Bottom Sheet
-                  Navigator.of(context).pop();
-                } else {
-                  _showFeedback('ກະລຸນາໃສ່ຈຳນວນທີ່ຖືກຕ້ອງ', isError: true);
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("ແກ້ໄຂຈຳນວນສິນຄ້າ"),
+              content: TextField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  autofocus: true,
+                  decoration: InputDecoration(labelText: "ໃສ່ຈຳນວນທີ່ຕ້ອງການ")),
+              actions: [
+                TextButton(
+                    child: Text("ຍົກເລີກ"),
+                    onPressed: () => Navigator.of(context).pop()),
+                ElevatedButton(
+                  child: Text("ຍືນຢັນ"),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFE45C58),
+                      foregroundColor: Colors.white),
+                  onPressed: () {
+                    final newQuantity = int.tryParse(quantityController.text);
+                    if (newQuantity != null && newQuantity > 0) {
+                      if (newQuantity <= item['Quantity']) {
+                        setState(() {
+                          cartItems[index]['quantity'] = newQuantity;
+                          _calculateTotal();
+                        });
+                        updater?.call(() {});
+                        Navigator.of(context).pop();
+                      } else {
+                        Navigator.of(context).pop();
+                        _showFeedback('ສິນຄ້າໃນສະຕັອກບໍ່ພໍ', isError: true);
+                      }
+                    } else if (newQuantity != null && newQuantity <= 0) {
+                      setState(() {
+                        cartItems.removeAt(index);
+                        _calculateTotal();
+                        if (cartItems.isEmpty && Navigator.canPop(context))
+                          Navigator.pop(context);
+                      });
+                      updater?.call(() {});
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+            ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
-        title: Text('ຂາຍສິນຄ້າ'),
+        title: Text(
+          'ຂາຍສິນຄ້າ',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Color(0xFFE45C58),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: AppDrawer(),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 800) {
-                  return Row(
-                    children: [
+              builder: (context, constraints) => (constraints.maxWidth > 800)
+                  ? Row(children: [
                       Expanded(flex: 7, child: _buildProductGridPanel()),
                       Expanded(flex: 3, child: _buildCartPanel()),
-                    ],
-                  );
-                } else {
-                  return _buildProductGridPanel();
-                }
-              },
-            ),
+                    ])
+                  : _buildProductGridPanel()),
       floatingActionButton: MediaQuery.of(context).size.width <= 800
           ? FloatingActionButton.extended(
               onPressed: () => showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) {
-                  // ໃຊ້ StatefulBuilder ເພື່ອໃຫ້ Bottom Sheet ມີ State ຂອງຕົວເອງ
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter modalSetState) {
-                      return FractionallySizedBox(
-                        heightFactor: 0.6,
-                        child: _buildCartPanel(
-                          isBottomSheet: true,
-                          updater:
-                              modalSetState, // ສົ່ງຕົວອັບເດດ UI ກັບໄປຫາ Cart Panel
-                        ),
-                      );
-                    },
-                  );
-                },
+                builder: (context) => StatefulBuilder(
+                    builder:
+                        (BuildContext context, StateSetter modalSetState) =>
+                            FractionallySizedBox(
+                                heightFactor: 0.6,
+                                child: _buildCartPanel(
+                                    isBottomSheet: true,
+                                    updater: modalSetState))),
               ),
               label: Text("ກະຕ່າ (${cartItems.length})"),
               icon: Icon(Icons.shopping_cart),
@@ -296,28 +295,23 @@ class _SalePageState extends State<SalePage> {
   }
 
   Widget _buildProductGridPanel() {
-    return Column(
-      children: [
-        _buildFilterBar(),
-        Expanded(
+    return Column(children: [
+      _buildFilterBar(),
+      Expanded(
           child: displayedProducts.isEmpty
               ? Center(child: Text("ບໍ່ມີສິນຄ້າຕາມການຄົ້ນຫາ"))
               : GridView.builder(
                   padding: EdgeInsets.all(12),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: _getCrossAxisCount(context),
-                    childAspectRatio: 0.8,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
+                      crossAxisCount: _getCrossAxisCount(context),
+                      childAspectRatio: 0.8,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12),
                   itemCount: displayedProducts.length,
-                  itemBuilder: (context, index) {
-                    return _buildProductCard(displayedProducts[index]);
-                  },
-                ),
-        ),
-      ],
-    );
+                  itemBuilder: (context, index) =>
+                      _buildProductCard(displayedProducts[index]),
+                )),
+    ]);
   }
 
   int _getCrossAxisCount(BuildContext context) {
@@ -327,128 +321,133 @@ class _SalePageState extends State<SalePage> {
     return 2;
   }
 
-  Widget _buildFilterBar() {
-    return Padding(
+  Widget _buildFilterBar() => Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
         children: [
-          Expanded(
+          SizedBox(
+            width: 250,
             child: TextField(
-              controller: searchController,
-              onChanged: (value) => _filterProducts(),
-              decoration: InputDecoration(
-                hintText: "ຄົ້ນຫາສິນຄ້າ...",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(vertical: 8),
-              ),
-            ),
+                controller: searchController,
+                onChanged: (value) => _filterProducts(),
+                decoration: InputDecoration(
+                    hintText: "ຄົ້ນຫາ (ຊື່ ຫຼື ID)...",
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 8, horizontal: 12))),
           ),
-          SizedBox(width: 10),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12)),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: selectedCategoryId,
-                hint: Text("ທັງໝົດ"),
-                items: [
-                  DropdownMenuItem<String>(
-                    value: null,
-                    child: Text("ທັງໝົດ (All)"),
-                  ),
-                  ...allCategories.map<DropdownMenuItem<String>>((category) {
-                    return DropdownMenuItem<String>(
-                      value: category['CategoryID'],
-                      child: Text(category['CategoryName']),
-                    );
-                  }).toList(),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategoryId = value;
-                    _filterProducts();
-                  });
-                },
-              ),
-            ),
+                child: DropdownButton<String>(
+              value: selectedCategoryId,
+              hint: Text("ໝວດໝູ່"),
+              items: [
+                DropdownMenuItem<String>(
+                    value: null, child: Text("ໝວດໝູ່ທັງໝົດ")),
+                ...allCategories
+                    .map<DropdownMenuItem<String>>((category) =>
+                        DropdownMenuItem<String>(
+                            value: category['CategoryID'],
+                            child: Text(category['CategoryName'])))
+                    .toList(),
+              ],
+              onChanged: (value) => setState(() {
+                selectedCategoryId = value;
+                _filterProducts();
+              }),
+            )),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12)),
+            child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+              value: selectedAuthorId,
+              hint: Text("ຜູ້ແຕ່ງ"),
+              items: [
+                DropdownMenuItem<int>(
+                    value: null, child: Text("ຜູ້ແຕ່ງທັງໝົດ")),
+                ...allAuthors
+                    .map<DropdownMenuItem<int>>((author) =>
+                        DropdownMenuItem<int>(
+                            value: author['authorID'],
+                            child: Text(author['name'])))
+                    .toList(),
+              ],
+              onChanged: (value) => setState(() {
+                selectedAuthorId = value;
+                _filterProducts();
+              }),
+            )),
           ),
         ],
-      ),
-    );
-  }
+      ));
 
   Widget _buildProductCard(Map<String, dynamic> product) {
+    final imageUrl = product['ProductImageURL'] != null
+        ? baseUrl + product['ProductImageURL']
+        : null;
+
     return Card(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 3,
       child: InkWell(
         onTap: () => addToCart(product),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Expanded(
               child: Container(
-                color: Colors.grey.shade100,
-                child:
-                    (product['ProductImageURL'] != null &&
-                        product['ProductImageURL'].isNotEmpty)
-                    ? Image.network(
-                        product['ProductImageURL'],
-                        fit: BoxFit.cover,
-                        errorBuilder: (ctx, err, st) =>
-                            Icon(Icons.image, color: Colors.grey.shade400),
-                      )
-                    : Icon(
-                        Icons.inventory_2,
-                        size: 50,
-                        color: Colors.grey.shade400,
-                      ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                  color: Colors.grey.shade200,
+                  child: imageUrl != null && imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(strokeWidth: 2)),
+                          errorWidget: (context, url, error) => Icon(
+                              Icons.broken_image,
+                              color: Colors.grey,
+                              size: 40),
+                        )
+                      : Icon(Icons.inventory_2,
+                          size: 50, color: Colors.grey.shade400))),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(product['ProductName'] ?? 'No Name',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
+              SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    product['ProductName'] ?? 'No Name',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${product['SellPrice']} LAK',
-                        style: TextStyle(
+                  Text('${formatter.format(product['SellPrice'])} LAK',
+                      style: TextStyle(
                           color: Color(0xFFE45C58),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Stock: ${product['Quantity']}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
-                  ),
+                          fontWeight: FontWeight.bold)),
+                  Text('Stock: ${product['Quantity']}',
+                      style: TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
-            ),
-          ],
-        ),
+            ]),
+          ),
+        ]),
       ),
     );
   }
@@ -458,22 +457,18 @@ class _SalePageState extends State<SalePage> {
       padding: EdgeInsets.all(16),
       margin: isBottomSheet ? EdgeInsets.zero : EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: isBottomSheet
-            ? BorderRadius.vertical(top: Radius.circular(20))
-            : null,
-        boxShadow: [
-          BoxShadow(blurRadius: 5, color: Colors.black.withOpacity(0.1)),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            "ລາຍການຂາຍ ",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          Divider(),
-          Expanded(
+          color: Colors.white,
+          borderRadius: isBottomSheet
+              ? BorderRadius.vertical(top: Radius.circular(20))
+              : null,
+          boxShadow: [
+            BoxShadow(blurRadius: 5, color: Colors.black.withOpacity(0.1))
+          ]),
+      child: Column(children: [
+        Text("ລາຍການຂາຍ",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Divider(),
+        Expanded(
             child: cartItems.isEmpty
                 ? Center(child: Text("ກະຕ່າວ່າງເປົ່າ"))
                 : ListView.builder(
@@ -482,88 +477,61 @@ class _SalePageState extends State<SalePage> {
                       final item = cartItems[index];
                       return ListTile(
                         title: Text(item['ProductName']),
-                        subtitle: Text('${item['SellPrice']} LAK'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
+                        subtitle:
+                            Text('${formatter.format(item['SellPrice'])} LAK'),
+                        trailing:
+                            Row(mainAxisSize: MainAxisSize.min, children: [
+                          IconButton(
                               icon: Icon(Icons.remove_circle_outline, size: 22),
                               onPressed: () =>
-                                  decrementItem(index, updater: updater),
-                            ),
-                            GestureDetector(
-                              onTap: () => _showEditQuantityDialog(
-                                index,
-                                updater: updater,
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  item['quantity'].toString(),
+                                  decrementItem(index, updater: updater)),
+                          GestureDetector(
+                            onTap: () => _showEditQuantityDialog(index,
+                                updater: updater),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                  border:
+                                      Border.all(color: Colors.grey.shade300),
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Text(item['quantity'].toString(),
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16)),
                             ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.add_circle_outline,
-                                size: 22,
-                                color: Color(0xFFE45C58),
-                              ),
+                          ),
+                          IconButton(
+                              icon: Icon(Icons.add_circle_outline,
+                                  size: 22, color: Color(0xFFE45C58)),
                               onPressed: () =>
-                                  incrementItem(index, updater: updater),
-                            ),
-                          ],
-                        ),
+                                  incrementItem(index, updater: updater)),
+                        ]),
                       );
                     },
-                  ),
-          ),
-          Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "ຍອດລວມ:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              Text(
-                '$totalAmount LAK',
-                style: TextStyle(
+                  )),
+        Divider(),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text("ຍອດລວມ:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text('${formatter.format(totalAmount)} LAK',
+              style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
-                  color: Color(0xFFE45C58),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-          SizedBox(
+                  color: Color(0xFFE45C58))),
+        ]),
+        SizedBox(height: 16),
+        SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _proceedToPayment,
               child: Text("ຊຳລະເງິນ"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE45C58),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-        ],
-      ),
+                  backgroundColor: Color(0xFFE45C58),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16)),
+            )),
+      ]),
     );
   }
 }

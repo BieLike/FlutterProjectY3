@@ -1,158 +1,116 @@
 import 'dart:convert';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
-import 'package:flutter_lect2/newuxui/page/Product/EditAddProduct.dart';
+import 'package:flutter_lect2/newuxui/page/product/addedit_page.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class ManageProductsPage extends StatefulWidget {
   const ManageProductsPage({super.key});
 
   @override
-  State<ManageProductsPage> createState() => _ProductPageState();
+  State<ManageProductsPage> createState() => _ManageProductsPageState();
 }
 
-basePath bp = basePath();
-final String bpt = bp.bpath();
-
-class _ProductPageState extends State<ManageProductsPage> {
+class _ManageProductsPageState extends State<ManageProductsPage> {
   List data = [];
-  final String baseurl = bpt;
+  final String baseurl = basePath().bpath();
   TextEditingController txtSearch = TextEditingController();
   bool isLoading = false;
 
   @override
   void initState() {
-    FetchAllData();
     super.initState();
+    fetchAllData();
   }
 
-  Future<void> FetchValData(String SearchTerm) async {
-    if (SearchTerm.isEmpty) {
-      FetchAllData();
+  Future<void> fetchAllData() async {
+    setState(() => isLoading = true);
+    try {
+      final response = await http.get(Uri.parse("$baseurl/main/product"));
+      if (response.statusCode == 200 && mounted) {
+        setState(() => data = json.decode(response.body));
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> fetchValData(String searchTerm) async {
+    if (searchTerm.isEmpty) {
+      fetchAllData();
       return;
     }
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
     try {
-      final String urlf = "$baseurl/main/product/$SearchTerm";
-      final respons = await http.get(Uri.parse(urlf));
-      if (respons.statusCode == 200) {
-        setState(() {
-          data = json.decode(respons.body);
-          isLoading = false;
-        });
-      } else {
-        print("Error: ${respons.statusCode}");
-        setState(() {
-          isLoading = false;
-        });
+      final response =
+          await http.get(Uri.parse("$baseurl/main/product/$searchTerm"));
+      if (response.statusCode == 200 && mounted) {
+        setState(() => data = json.decode(response.body));
+      } else if (mounted) {
+        setState(() => data = []);
       }
     } catch (e) {
       print(e);
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
-  Future<void> FetchAllData() async {
-    try {
-      final String url = "$baseurl/main/product";
-      final respons = await http.get(Uri.parse(url));
-      if (respons.statusCode == 200) {
-        setState(() {
-          data = json.decode(respons.body);
-          isLoading = false;
-        });
-      } else {
-        print("Error: ${respons.statusCode}");
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+  Future<void> deleteProduct(String pID) async {
+    final employeeData = await _getEmployeeData();
+    if (employeeData == null) return;
 
-  void ShowErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  void ShowSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  Future<void> DeleteProduct(String PID) async {
-    setState(() {
-      isLoading = true;
-    });
-
+    setState(() => isLoading = true);
     try {
       final response = await http.delete(
-        Uri.parse("$baseurl/main/product/$PID"),
+        Uri.parse("$baseurl/main/product/$pID"),
         headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "EmployeeID": employeeData['UID'],
+          "EmployeeName": employeeData['UserFname']
+        }),
       );
-
-      setState(() {
-        isLoading = false;
-      });
-
       if (response.statusCode == 200) {
-        FetchAllData();
-        final responseBody = json.decode(response.body);
-        ShowSuccessMessage(
-            responseBody['msg'] ?? "Product deleted successfully!");
+        showSuccessMessage("Product deleted successfully!");
+        await fetchAllData();
       } else {
-        final responseBody = json.decode(response.body);
-        ShowErrorMessage(responseBody['msg'] ??
-            "Failed to delete Product. Status: ${response.statusCode}");
+        final body = json.decode(response.body);
+        showErrorMessage(body['message'] ?? body['msg'] ?? "Failed to delete");
       }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print(e);
-      ShowErrorMessage("Failed to delete product: ${e.toString()}");
+      showErrorMessage("Error: ${e.toString()}");
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
-  void ShowDeleteConfirmation(String PID, String Pname) {
+  void showDeleteConfirmation(String pID, String pName) {
     showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("Delete confirmation"),
-              content: Text("You now deleting '$Pname' ('$PID')"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    DeleteProduct(PID);
-                  },
-                  child: Text("Delete"),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red,
-                  ),
-                )
-              ],
-            ));
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("ຢືນຢັນການລົບ"),
+        content: Text("ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລົບ '$pName'?"),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("ຍົກເລີກ")),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              deleteProduct(pID);
+            },
+            child: Text("ລົບ", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
-  // Navigate to AddEditProductPage
   Future<void> navigateToAddEditPage(
       {Map<String, dynamic>? productData}) async {
     final result = await Navigator.push(
@@ -161,187 +119,215 @@ class _ProductPageState extends State<ManageProductsPage> {
         builder: (context) => AddEditProductPage(productData: productData),
       ),
     );
-
-    // If the operation was successful, refresh the data
     if (result == true) {
-      FetchAllData();
+      fetchAllData();
     }
+  }
+
+  Future<Map<String, dynamic>?> _getEmployeeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDataString = prefs.getString('user_data');
+    if (userDataString == null) {
+      showErrorMessage("User data not found. Please log in again.");
+      return null;
+    }
+    return json.decode(userDataString);
+  }
+
+  void showErrorMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red));
+  }
+
+  void showSuccessMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.green));
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get screen width for responsive design
     final screenWidth = MediaQuery.of(context).size.width;
-    int crossAxisCount = 2; // Default for small screens
-
-    if (screenWidth > 600 && screenWidth <= 900) {
-      crossAxisCount = 3;
-    } else if (screenWidth > 900) {
-      crossAxisCount = 4;
-    }
+    int crossAxisCount = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
 
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
-        title: Text('ຈັດການສິນຄ້າ'),
+        title: Text(
+          'ຈັດການປຶ້ມ',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Color(0xFFE45C58),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: AppDrawer(),
       body: Column(
         children: [
-          // Search bar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
-              onChanged: (val) {
-                if (txtSearch.text.isEmpty) {
-                  FetchAllData();
-                } else {
-                  FetchValData(txtSearch.text);
-                }
-              },
+              onChanged: fetchValData,
               controller: txtSearch,
               decoration: InputDecoration(
-                hintText: "ຄົ້ນຫາສິນຄ້າ...",
+                hintText: "ຄົ້ນหาປຶ້ມ...",
                 prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 filled: true,
                 fillColor: Colors.white,
               ),
             ),
           ),
-          // Product Grid
           Expanded(
-            child: data.isEmpty
+            child: isLoading
                 ? Center(child: CircularProgressIndicator())
-                : Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: 0.9,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        final product = data[index];
-                        return Card(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                : data.isEmpty
+                    ? Center(child: Text("No products found"))
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(8.0),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          childAspectRatio: 0.7,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount: data.length,
+                        itemBuilder: (context, index) {
+                          final product = data[index];
+                          final imageUrl = product['ProductImageURL'] != null
+                              ? baseurl + product['ProductImageURL']
+                              : null;
+
+                          return Card(
+                            elevation: 3,
+                            clipBehavior: Clip.antiAlias,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15)),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            Color(0xFFE45C58).withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        'ID: ${product['ProductID']}',
-                                        style: TextStyle(
-                                          color: Color(0xFFE45C58),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                    ),
-                                    Row(
+                                Expanded(
+                                  flex: 3,
+                                  child: Container(
+                                    color: Colors.grey[200],
+                                    child: imageUrl != null &&
+                                            imageUrl.isNotEmpty
+                                        ? CachedNetworkImage(
+                                            imageUrl: imageUrl,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                        strokeWidth: 2)),
+                                            errorWidget:
+                                                (context, url, error) => Icon(
+                                                    Icons.broken_image,
+                                                    color: Colors.grey),
+                                          )
+                                        : Icon(Icons.inventory_2_outlined,
+                                            size: 40, color: Colors.grey[400]),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        IconButton(
-                                          icon: Icon(Icons.edit,
-                                              color: Color(0xFFE45C58),
-                                              size: 20),
-                                          onPressed: () =>
-                                              navigateToAddEditPage(
-                                                  productData: product),
+                                        Text(
+                                          '${product['ProductName']}',
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        IconButton(
-                                          icon: Icon(Icons.delete,
-                                              color: Colors.red, size: 20),
-                                          onPressed: () =>
-                                              ShowDeleteConfirmation(
-                                            product['ProductID'].toString(),
-                                            product['ProductName'].toString(),
-                                          ),
+                                        // [ADD] เพิ่มการแสดงจำนวนหน้า
+                                        Row(
+                                          children: [
+                                            Icon(Icons.menu_book,
+                                                size: 12,
+                                                color: Colors.grey[600]),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              '${product['Bpage'] ?? 'N/A'} ໜ້າ',
+                                              style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey[700]),
+                                            ),
+                                          ],
                                         ),
+                                        Text(
+                                          'ຜູ້ແຕ່ງ: ${product['AuthorName'] ?? 'N/A'}',
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              fontStyle: FontStyle.italic,
+                                              color: Colors.grey[700]),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                                'ຈຳນວນ: ${product['Quantity']}',
+                                                style: TextStyle(
+                                                    color: Colors.grey[800],
+                                                    fontSize: 12)),
+                                            Text('${product['SellPrice']} LAK',
+                                                style: TextStyle(
+                                                    color: Colors.green,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13)),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () =>
+                                                  navigateToAddEditPage(
+                                                      productData: product),
+                                              icon: Icon(Icons.edit_outlined,
+                                                  color: Colors.blue.shade700,
+                                                  size: 20),
+                                              tooltip: 'ແກ້ໄຂ',
+                                              padding: EdgeInsets.zero,
+                                              constraints: BoxConstraints(),
+                                            ),
+                                            IconButton(
+                                              onPressed: () =>
+                                                  showDeleteConfirmation(
+                                                product['ProductID'].toString(),
+                                                product['ProductName']
+                                                    .toString(),
+                                              ),
+                                              icon: Icon(Icons.delete_outline,
+                                                  color: Colors.red.shade700,
+                                                  size: 20),
+                                              tooltip: 'ລົບ',
+                                              padding: EdgeInsets.zero,
+                                              constraints: BoxConstraints(),
+                                            ),
+                                          ],
+                                        )
                                       ],
                                     ),
-                                  ],
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  '${product['ProductName']}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.orange,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'ຈຳນວນ: ${product['Quantity']}',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  'ລາຄາ: \$${product['SellPrice']}',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  'ຫົວໜ່ວຍ: ${product['UnitName'] ?? 'N/A'}',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'ຍອດລວມຈຳນວນການນຳເຂົ້າ: ${product['Balance']}',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  'ຈຳນວນຂັ້ນຕໍ່າຂອງສິນຄ້າທີ່ຄວນມີ: ${product['Level']}',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

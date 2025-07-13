@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+// import 'package:flutter_lect2/newuxui/DBpath.dart';
+// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 
 class ManageUserPage extends StatefulWidget {
@@ -580,6 +582,7 @@ class _ManageUserPageState extends State<ManageUserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
         title: Text('ຈັດການຜູ້ໃຊ້'),
         backgroundColor: Color(0xFFE45C58),

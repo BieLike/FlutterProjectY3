@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+// import 'package:flutter_lect2/newuxui/DBpath.dart';
+// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageUnitPage extends StatefulWidget {
   const ManageUnitPage({super.key});
@@ -29,6 +32,16 @@ class _UnitPageState extends State<ManageUnitPage> {
   void initState() {
     FetchAllData();
     super.initState();
+  }
+
+  Future<Map<String, dynamic>?> _getEmployeeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDataString = prefs.getString('user_data');
+    if (userDataString == null) {
+      ShowErrorMessage("ບໍ່ພົບຂໍ້ມູນຜູ້ໃຊ້, ກະລຸນາລັອກອິນໃໝ່");
+      return null;
+    }
+    return json.decode(userDataString);
   }
 
   Future<void> FetchValData(String SearchTerm) async {
@@ -110,68 +123,42 @@ class _UnitPageState extends State<ManageUnitPage> {
       isLoading = true;
     });
 
+    final employeeData = await _getEmployeeData();
+    if (employeeData == null) {
+      setState(() => isLoading = false);
+      return;
+    }
+
     try {
-      List check = [];
-      final confirm = await http.get(
-        Uri.parse("$baseurl/main/product/$UID"),
+      final response = await http.delete(
+        Uri.parse("$baseurl/main/unit/$UID"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "EmployeeID": employeeData['UID'],
+          "EmployeeName": employeeData['UserFname']
+        }),
       );
-      if (confirm.statusCode == 200) {
-        check = json.decode(confirm.body);
-        if (check.length > 0) {
-          setState(() {
-            isLoading = false;
-          });
-          ShowErrorMessage("Still in use");
-          return;
-        }
-      } else if (confirm.statusCode == 300) {
-        final response = await http.delete(
-          Uri.parse("$baseurl/main/unit/$UID"),
-          headers: {'Content-Type': 'application/json'},
-        );
 
-        setState(() {
-          isLoading = false;
-        });
-
-        if (response.statusCode == 200) {
-          FetchAllData();
-          final responseBody = json.decode(response.body);
-          ShowSuccessMessage(
-              responseBody['msg'] ?? "Unit deleted successfully!");
-        } else {
-          final responseBody = json.decode(response.body);
-          ShowErrorMessage(responseBody['msg'] ??
-              "Failed to delete unit. Status: ${response.statusCode}");
-        }
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+        ShowSuccessMessage(responseBody['msg'] ?? "Unit deleted successfully!");
+        FetchAllData();
+      } else if (response.statusCode == 409) {
+        final responseBody = json.decode(response.body);
+        ShowErrorMessage(
+            responseBody['message'] ?? "Cannot delete: Unit is still in use.");
       } else {
-        // If status is neither 200 nor 300, try to delete anyway
-        final response = await http.delete(
-          Uri.parse("$baseurl/main/unit/$UID"),
-          headers: {'Content-Type': 'application/json'},
-        );
-
-        setState(() {
-          isLoading = false;
-        });
-
-        if (response.statusCode == 200) {
-          FetchAllData();
-          final responseBody = json.decode(response.body);
-          ShowSuccessMessage(
-              responseBody['msg'] ?? "Unit deleted successfully!");
-        } else {
-          final responseBody = json.decode(response.body);
-          ShowErrorMessage(responseBody['msg'] ??
-              "Failed to delete unit. Status: ${response.statusCode}");
-        }
+        final responseBody = json.decode(response.body);
+        ShowErrorMessage(responseBody['msg'] ??
+            "Failed to delete unit. Status: ${response.statusCode}");
       }
     } catch (e) {
+      print(e);
+      ShowErrorMessage("Failed to delete unit: ${e.toString()}");
+    } finally {
       setState(() {
         isLoading = false;
       });
-      print(e);
-      ShowErrorMessage("Failed to delete unit: ${e.toString()}");
     }
   }
 
@@ -228,6 +215,8 @@ class _UnitPageState extends State<ManageUnitPage> {
         ShowErrorMessage("Unit ID and Name are required!");
         return;
       }
+      final employeeData = await _getEmployeeData();
+      if (employeeData == null) return;
       setState(() {
         isLoading = true;
       });
@@ -239,6 +228,8 @@ class _UnitPageState extends State<ManageUnitPage> {
           body: jsonEncode({
             "UnitID": txtID.text,
             "UnitName": txtName.text,
+            "EmployeeID": employeeData['UID'],
+            "EmployeeName": employeeData['UserFname']
           }),
         );
 
@@ -272,6 +263,8 @@ class _UnitPageState extends State<ManageUnitPage> {
         ShowErrorMessage("All field are required! (except green)");
         return;
       }
+      final employeeData = await _getEmployeeData();
+      if (employeeData == null) return;
       setState(() {
         isLoading = true;
       });
@@ -285,6 +278,8 @@ class _UnitPageState extends State<ManageUnitPage> {
               "NewUnitID": txtNewID.text,
               "UnitName": txtName.text,
               "NewUnitName": txtNewName.text,
+              "EmployeeID": employeeData['UID'],
+              "EmployeeName": employeeData['UserFname']
             }));
         setState(() {
           isLoading = false;
@@ -467,7 +462,7 @@ class _UnitPageState extends State<ManageUnitPage> {
                                     controller: txtNewName,
                                     decoration: InputDecoration(
                                       labelText: 'ຊື່ໃໝ່',
-                                      hintText: 'ປ້ອນຊື່ໃໝ່ຫົວໜ່ວຍ',
+                                      hintText: 'ປ້ອນຊື່ໃໝ່',
                                       labelStyle:
                                           TextStyle(color: Colors.green),
                                       border: OutlineInputBorder(
@@ -532,6 +527,7 @@ class _UnitPageState extends State<ManageUnitPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
         title: Text('ຈັດການຫົວໜ່ວຍ'),
         backgroundColor: Color(0xFFE45C58),

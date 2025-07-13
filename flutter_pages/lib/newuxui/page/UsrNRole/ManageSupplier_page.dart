@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+// import 'package:flutter_lect2/newuxui/DBpath.dart';
+// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageSuppliersPage extends StatefulWidget {
   const ManageSuppliersPage({super.key});
@@ -59,6 +62,16 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
   }
 
   // ================= API METHODS =================
+
+  Future<Map<String, dynamic>?> _getEmployeeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDataString = prefs.getString('user_data');
+    if (userDataString == null) {
+      showErrorMessage("ບໍ່ພົບຂໍ້ມູນຜູ້ໃຊ້, ກະລຸນາລັອກອິນໃໝ່");
+      return null;
+    }
+    return json.decode(userDataString);
+  }
 
   /// Fetch all suppliers from the API
   Future<void> fetchAllSuppliers() async {
@@ -123,6 +136,8 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
       return;
     }
 
+    final employeeData = await _getEmployeeData();
+    if (employeeData == null) return;
     setState(() {
       isLoading = true;
     });
@@ -143,6 +158,8 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                   ? null
                   : addressController.text.trim(),
               "Status": selectedStatus,
+              "EmployeeID": employeeData['UID'],
+              "EmployeeName": employeeData['UserFname']
             }),
           )
           .timeout(const Duration(seconds: 10));
@@ -191,6 +208,8 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
       showErrorMessage("Please enter a valid phone number");
       return;
     }
+    final employeeData = await _getEmployeeData();
+    if (employeeData == null) return;
 
     setState(() {
       isLoading = true;
@@ -218,6 +237,8 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
                   ? null
                   : addressController.text.trim(),
               "Status": selectedStatus,
+              "EmployeeID": employeeData['UID'],
+              "EmployeeName": employeeData['UserFname']
             }),
           )
           .timeout(const Duration(seconds: 10));
@@ -257,11 +278,23 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
       isLoading = true;
     });
 
+    final employeeData = await _getEmployeeData();
+    if (employeeData == null) {
+      setState(() => isLoading = false);
+      return;
+    }
+
     try {
-      final response = await http.delete(
-        Uri.parse("$baseUrl/main/supplier/$supplierID"),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .delete(
+            Uri.parse("$baseUrl/main/supplier/$supplierID"),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              "EmployeeID": employeeData['UID'],
+              "EmployeeName": employeeData['UserFname']
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       setState(() {
         isLoading = false;
@@ -588,8 +621,15 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
     }
 
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
-        title: const Text('ຈັດການຜູ້ສະໜອງ'),
+        title: const Text(
+          'ຈັດການຜູ້ສະໜອງ',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: const Color(0xFFE45C58),
         foregroundColor: Colors.white,
         elevation: 2,
@@ -601,7 +641,7 @@ class _ManageSuppliersPageState extends State<ManageSuppliersPage> {
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: Color(0xFFE45C58),
               boxShadow: [
                 BoxShadow(
                   offset: const Offset(0, 2),

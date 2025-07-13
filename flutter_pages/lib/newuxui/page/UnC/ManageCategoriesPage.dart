@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+// import 'package:flutter_lect2/newuxui/DBpath.dart';
+// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageCategoriesPage extends StatefulWidget {
   const ManageCategoriesPage({super.key});
@@ -28,6 +31,16 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
   void initState() {
     FetchAllData();
     super.initState();
+  }
+
+  Future<Map<String, dynamic>?> _getEmployeeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDataString = prefs.getString('user_data');
+    if (userDataString == null) {
+      ShowErrorMessage("ບໍ່ພົບຜູ້ໃຊ້ ກະລຸນາລັອກອິນໃໝ່");
+      return null;
+    }
+    return json.decode(userDataString);
   }
 
   Future<void> FetchValData(String SearchTerm) async {
@@ -100,43 +113,43 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
       isLoading = true;
     });
 
+    final employeeData = await _getEmployeeData();
+    if (employeeData == null) {
+      setState(() => isLoading = false);
+      return;
+    }
+
     try {
-      List check = [];
-      final confirm = await http.get(
-        Uri.parse("$baseurl/main/product/$CID"),
+      final response = await http.delete(
+        Uri.parse("$baseurl/main/category/$CID"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "EmployeeID": employeeData['UID'],
+          "EmployeeName": employeeData['UserFname']
+        }),
       );
-      if (confirm.statusCode == 200) {
-        check = json.decode(confirm.body);
-        if (check.isNotEmpty) {
-          ShowErrorMessage("Still in use ");
-        }
-      } else if (confirm.statusCode == 300) {
-        final response = await http.delete(
-          Uri.parse("$baseurl/main/category/$CID"),
-          headers: {'Content-Type': 'application/json'},
-        );
 
-        setState(() {
-          isLoading = false;
-        });
-
-        if (response.statusCode == 200) {
-          FetchAllData();
-          final responseBody = json.decode(response.body);
-          ShowSuccessMessage(
-              responseBody['msg'] ?? "Category deleted successfully!");
-        } else {
-          final responseBody = json.decode(response.body);
-          ShowErrorMessage(responseBody['msg'] ??
-              "Failed to delete Category. Status: ${response.statusCode}");
-        }
+      if (response.statusCode == 200) {
+        FetchAllData();
+        final responseBody = json.decode(response.body);
+        ShowSuccessMessage(
+            responseBody['msg'] ?? "Category deleted successfully!");
+      } else if (response.statusCode == 409) {
+        final responseBody = json.decode(response.body);
+        ShowErrorMessage(responseBody['message'] ??
+            "Cannot delete: Category is still in use.");
+      } else {
+        final responseBody = json.decode(response.body);
+        ShowErrorMessage(responseBody['msg'] ??
+            "Failed to delete category. Status: ${response.statusCode}");
       }
     } catch (e) {
+      print(e);
+      ShowErrorMessage("Failed to delete category: ${e.toString()}");
+    } finally {
       setState(() {
         isLoading = false;
       });
-      print(e);
-      ShowErrorMessage("Failed to delete category: ${e.toString()}");
     }
   }
 
@@ -196,6 +209,8 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
       setState(() {
         isLoading = true;
       });
+      final employeeData = await _getEmployeeData();
+      if (employeeData == null) return;
 
       try {
         final response = await http.post(Uri.parse("$baseurl/main/category"),
@@ -203,6 +218,8 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
             body: jsonEncode({
               "CategoryID": txtID.text,
               "CategoryName": txtName.text,
+              "EmployeeID": employeeData['UID'],
+              "EmployeeName": employeeData['UserFname']
             }));
         setState(() {
           isLoading = false;
@@ -227,10 +244,6 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
     }
 
     Future<void> UpdateCategory(String PID) async {
-      if (txtNewID.text.trim().isEmpty && txtNewName.text.trim().isEmpty) {
-        ShowErrorMessage("Please enter at least one new value to update!");
-        return;
-      }
       if (txtID.text.isEmpty || txtName.text.isEmpty) {
         ShowErrorMessage("All field are required!");
         return;
@@ -238,6 +251,8 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
       setState(() {
         isLoading = true;
       });
+      final employeeData = await _getEmployeeData();
+      if (employeeData == null) return;
 
       try {
         final String CID = txtID.text;
@@ -249,6 +264,8 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                   "NewCategoryID": txtNewID.text,
                   "CategoryName": txtName.text,
                   "NewCategoryName": txtNewName.text,
+                  "EmployeeID": employeeData['UID'],
+                  "EmployeeName": employeeData['UserFname']
                 }));
         setState(() {
           isLoading = false;
@@ -290,175 +307,101 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (CatData == null) ...[
-                        // Add Mode
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: TextField(
-                                controller: txtID,
-                                decoration: InputDecoration(
-                                  labelText: 'ID ປະເພດ *',
-                                  hintText: 'ປ້ອນ ID ປະເພດ',
-                                  labelStyle:
-                                      TextStyle(color: Color(0xFFE45C58)),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE45C58)),
-                                  ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 110,
+                            child: TextField(
+                              controller: txtID,
+                              decoration: InputDecoration(
+                                labelText: 'ID',
+                                labelStyle: TextStyle(color: Colors.red),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFFE45C58)),
                                 ),
                               ),
+                              enabled: CatData == null,
                             ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              flex: 3,
-                              child: TextField(
-                                controller: txtName,
-                                decoration: InputDecoration(
-                                  labelText: 'ຊື່ປະເພດ *',
-                                  hintText: 'ປ້ອນຊື່ປະເພດ',
-                                  labelStyle:
-                                      TextStyle(color: Color(0xFFE45C58)),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE45C58)),
-                                  ),
+                          ),
+                          SizedBox(width: 5),
+                          Container(
+                            width: 250,
+                            child: TextField(
+                              controller: txtName,
+                              decoration: InputDecoration(
+                                labelText: 'ຊື່',
+                                labelStyle: TextStyle(color: Colors.red),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFFE45C58)),
                                 ),
                               ),
+                              enabled: CatData == null,
                             ),
-                          ],
-                        ),
-                      ] else ...[
-                        Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Text(
-                                  'ລາຍລະອຽດປະເພດປັດຈຸບັນ',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Container(
+                            width: 110,
+                            child: TextField(
+                              controller: txtNewID,
+                              decoration: InputDecoration(
+                                labelText: 'ID ໃໝ່',
+                                labelStyle: TextStyle(
+                                  color: CatData != null
+                                      ? Colors.green.shade500
+                                      : Colors.green.shade200,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide:
+                                      BorderSide(color: Colors.green.shade500),
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: TextField(
-                                      controller: txtID,
-                                      enabled: false,
-                                      decoration: InputDecoration(
-                                          labelText: 'ID ປັດຈຸບັນ',
-                                          labelStyle:
-                                              TextStyle(color: Colors.red),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          filled: true,
-                                          fillColor: Colors.grey[100]),
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                    flex: 3,
-                                    child: TextField(
-                                      controller: txtName,
-                                      enabled: false,
-                                      decoration: InputDecoration(
-                                        labelText: 'ຊື່ປັດຈຸບັນ',
-                                        labelStyle:
-                                            TextStyle(color: Colors.red),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.grey[100],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Text(
-                                  'ລາຍລະອຽດຫົວໜ່ວຍໃໝ່(ທາງເລືອກ:ປ່ອຍຫວ່າງໄວ້ຖ້າຕ້ອງການໃຊ້ຕົວເກົ່າ)',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              enabled: CatData != null,
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Container(
+                            width: 250,
+                            child: TextField(
+                              controller: txtNewName,
+                              decoration: InputDecoration(
+                                labelText: 'ຊື່ໃໝ່',
+                                labelStyle: TextStyle(
+                                  color: CatData != null
+                                      ? Colors.green.shade500
+                                      : Colors.green.shade200,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide:
+                                      BorderSide(color: Colors.green.shade500),
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: TextField(
-                                      controller: txtNewID,
-                                      decoration: InputDecoration(
-                                        labelText: 'ID ໃໝ່',
-                                        hintText: 'ປ້ອນ ID ປະເພດໃໝ່',
-                                        labelStyle: TextStyle(
-                                          color: CatData != null
-                                              ? Colors.green.shade500
-                                              : Colors.green.shade200,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          borderSide: BorderSide(
-                                              color: Colors.green.shade500),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                    flex: 3,
-                                    child: TextField(
-                                      controller: txtNewName,
-                                      decoration: InputDecoration(
-                                        labelText: 'ຊື່ໃໝ່',
-                                        hintText: 'ປ້ອນຊື່ປະເພດໃໝ່',
-                                        labelStyle: TextStyle(
-                                          color: CatData != null
-                                              ? Colors.green.shade500
-                                              : Colors.green.shade200,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          borderSide: BorderSide(
-                                              color: Colors.green.shade500),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ]),
-                      ],
+                              enabled: CatData != null,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -505,9 +448,17 @@ class _CategoryPageState extends State<ManageCategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
-        title: Text('ຈັດການປະເພດສິນຄ້າ'),
+        title: Text(
+          'ຈັດການປະເພດສິນຄ້າ',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Color(0xFFE45C58),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: AppDrawer(),
       body: Column(

@@ -1,18 +1,18 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_lect2/newuxui/backupManagement.dart';
 import 'package:flutter_lect2/newuxui/page/Import/Import_page.dart';
-import 'package:flutter_lect2/newuxui/page/Sell_History/new_sellHistory.dart';
 import 'package:flutter_lect2/newuxui/page/UnC/ManageCategoriesPage.dart';
-import 'package:flutter_lect2/newuxui/page/Product/ManageProductsPage.dart';
+import 'package:flutter_lect2/newuxui/page/UnC/ManageUnitPage.dart';
 import 'package:flutter_lect2/newuxui/page/UsrNRole/ManageRole.dart';
 import 'package:flutter_lect2/newuxui/page/UsrNRole/ManageSupplier_page.dart';
-import 'package:flutter_lect2/newuxui/page/UnC/ManageUnitPage.dart';
 import 'package:flutter_lect2/newuxui/page/UsrNRole/ManageUser.dart';
-import 'package:flutter_lect2/newuxui/page/SettingsPage.dart';
+import 'package:flutter_lect2/newuxui/page/product/ManageProductsPage.dart';
+import 'package:flutter_lect2/newuxui/page/Sell_History/Sell_HistoryPage.dart';
 import 'package:flutter_lect2/newuxui/page/author/ManageAuthor.dart';
 import 'package:flutter_lect2/newuxui/page/login/login_screen.dart';
+import 'package:flutter_lect2/newuxui/page/mornitor/Mornitoring_page.dart';
 import 'package:flutter_lect2/newuxui/page/salepage/Salepage.dart';
-import 'package:flutter_lect2/newuxui/page/Import/shortImp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -24,251 +24,221 @@ class AppDrawer extends StatefulWidget {
 
 class _AppDrawerState extends State<AppDrawer> {
   String userRole = '';
-  String userName = '';
+  String userName = 'Guest';
 
   @override
   void initState() {
     super.initState();
-    loadUserRole();
+    _loadUserData();
   }
 
-  Future<void> loadUserRole() async {
+  // [EDIT] ปรับปรุงฟังก์ชันการดึงข้อมูลผู้ใช้
+  Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userRole = prefs.getString('role') ?? '';
-      userName = prefs.getString('UserFname') ?? '';
-    });
+    final userDataString = prefs.getString('user_data');
+    if (userDataString != null) {
+      final userData = json.decode(userDataString);
+      setState(() {
+        userRole = userData['RoleName'] ?? '';
+        userName = userData['UserFname'] ?? 'User';
+      });
+    }
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // ล้างข้อมูลทั้งหมดใน SharedPreferences
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // แปลงชื่อ Role เป็น Case-insensitive เพื่อความเสถียร
+    final String role = userRole.toLowerCase();
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color(0xFFE45C58),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFFE45C58)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 40, color: Colors.blue),
+                  child: Icon(Icons.person, size: 40, color: Color(0xFFE45C58)),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
-                  '${userName}',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
+                  userName,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
                 ),
-                if (userRole == 'Admin') ...{
-                  Text(
-                    'admin@bookstore.com',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                } else if (userRole == 'Cashier') ...{
-                  Text(
-                    'Cashier@bookstore.com',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                } else if (userRole == 'Stocker') ...{
-                  Text(
-                    'Stocker@bookstore.com',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                } else ...{
-                  Text(
-                    'user@bookstore.com',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                }
+                Text(
+                  userRole,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
               ],
             ),
           ),
-          if (userRole == 'Cashier' || userRole == 'Admin') ...[
+
+          // --- เมนูสำหรับ Cashier และ Admin ---
+          if (role == 'cashier' || role == 'admin') ...[
             ListTile(
-              leading: Icon(Icons.home),
+              leading: Icon(Icons.point_of_sale_outlined),
               title: Text('ຂາຍສິນຄ້າ'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SalePage()));
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => const SalePage()));
               },
             ),
-          ],
-          if (userRole == 'Cashier' || userRole == 'Admin') ...[
             ListTile(
-              leading: Icon(Icons.watch_later_outlined),
+              leading: Icon(Icons.history_outlined),
               title: Text('ປະຫວັດການຂາຍ'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => SalesHistoryPage()));
               },
             ),
-            Divider(
-              endIndent: 15.0,
-              indent: 15.0,
-            ),
+            const Divider(),
           ],
-          if (userRole == 'Admin') ...[
+
+          // --- เมนูสำหรับ Stocker และ Admin ---
+          if (role == 'stocker' || role == 'admin') ...[
             ListTile(
-              leading: Icon(Icons.inventory),
+              leading: Icon(Icons.local_shipping_outlined),
+              title: Text('ຈັດການຜູ້ສະໜອງ'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ManageSuppliersPage()));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.archive_outlined),
+              title: Text('ການນຳເຂົ້າສິນຄ້າ'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ManageImportPage()));
+              },
+            ),
+            const Divider(),
+          ],
+
+          // --- เมนูสำหรับ Admin เท่านั้น ---
+          if (role == 'admin') ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text("ການຕັ້ງຄ່າຫຼັກ",
+                  style: TextStyle(
+                      color: Colors.grey, fontWeight: FontWeight.bold)),
+            ),
+            ListTile(
+              leading: Icon(Icons.inventory_2_outlined),
               title: Text('ຈັດການສິນຄ້າ'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ManageProductsPage()),
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ManageProductsPage()));
               },
             ),
             ListTile(
-              leading: Icon(Icons.category),
+              leading: Icon(Icons.category_outlined),
               title: Text('ຈັດການໝວດໝູ່'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ManageCategoriesPage()),
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ManageCategoriesPage()));
               },
             ),
             ListTile(
-              leading: Icon(Icons.table_view),
+              leading: Icon(Icons.square_foot_outlined),
               title: Text('ຈັດການຂໍ້ມູນຫົວໜ່ວຍ'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => ManageUnitPage()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ManageUnitPage()));
               },
             ),
             ListTile(
               leading: Icon(Icons.person_pin_outlined),
               title: Text('ຈັດການຂໍ້ມູນຜູ້ແຕ່ງ'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ManageAuthorPage()));
+                        builder: (context) => const ManageAuthorPage()));
               },
             ),
-            Divider(
-              endIndent: 15.0,
-              indent: 15.0,
-            ),
-          ],
-          if (userRole == 'Stocker' || userRole == 'Admin') ...[
-            ListTile(
-              leading: Icon(Icons.emoji_transportation_rounded),
-              title: Text('ຈັດການຜູ້ສະໜອງ'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ManageSuppliersPage()),
-                );
-              },
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text("ການຈັດການລະບົບ",
+                  style: TextStyle(
+                      color: Colors.grey, fontWeight: FontWeight.bold)),
             ),
             ListTile(
-              leading: Icon(Icons.download),
-              title: Text('ການນຳເຂົ້າສິນຄ້າ'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ManageImportPage()));
-              },
-            ),
-            Divider(
-              endIndent: 15.0,
-              indent: 15.0,
-            ),
-          ],
-          if (userRole == 'Admin') ...[
-            ListTile(
-              leading: Icon(Icons.star),
+              leading: Icon(Icons.badge_outlined),
               title: Text('ຈັດການຕຳແໜ່ງ'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RolePage()),
-                );
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => RolePage()));
               },
             ),
             ListTile(
-              leading: Icon(Icons.emoji_people),
+              leading: Icon(Icons.people_alt_outlined),
               title: Text('ຈັດການຜູ້ໃຊ້'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ManageUserPage()),
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ManageUserPage()));
               },
-            ),
-          ],
-          if (userRole == 'Admin') ...[
-            Divider(
-              endIndent: 15.0,
-              indent: 15.0,
             ),
             ListTile(
-              leading: Icon(Icons.recycling),
-              title: Text('Restore'),
+              leading: Icon(Icons.dashboard_outlined),
+              title: Text('Dashboard & Logs'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => BackupRestorePage()),
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DashboardAndLogPage()));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.recycling_outlined),
+              title: Text('Backup & Restore'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const BackupRestorePage()));
               },
             ),
           ],
+
+          // --- เมนูสำหรับทุกคน ---
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('ຕັ້ງຄ່າ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SettingsPage()),
-              );
-            },
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.exit_to_app),
+            leading: Icon(Icons.logout),
             title: Text('ອອກຈາກລະບົບ'),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
-            },
+            onTap: _logout,
           ),
         ],
       ),

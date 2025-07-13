@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lect2/newuxui/DBpath.dart';
 import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
+// import 'package:flutter_lect2/newuxui/DBpath.dart';
+// import 'package:flutter_lect2/newuxui/widget/app_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -467,7 +469,7 @@ class _RolePageState extends State<RolePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFE45C58),
       appBar: AppBar(
         title: Text(
           'ຈັດການຕຳແໜ່ງ',
@@ -487,7 +489,7 @@ class _RolePageState extends State<RolePage> {
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(0xFFE45C58),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.1),
